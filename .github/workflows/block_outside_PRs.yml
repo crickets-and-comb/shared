@@ -1,0 +1,62 @@
+name: Restrict External PRs
+
+on:
+  workflow_call:
+    inputs:
+      ALLOWED_ORG:
+        description: 'GitHub organization name that is allowed to open PRs.'
+        type: string
+        required: true
+    secrets:
+      ORG_READ_TOKEN:
+        required: true
+
+defaults:
+  run:
+    shell: bash -el {0}
+
+jobs:
+  close-external-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR Author and Close If External
+        run: |
+          set -e
+
+          prAuthor=$(jq -r '.pull_request.user.login' < "$GITHUB_EVENT_PATH")
+          allowedOrg=${{ inputs.ALLOWED_ORG }}
+          prNumber=$(jq -r '.pull_request.number' < "$GITHUB_EVENT_PATH")
+
+          close_pr() {
+            echo "Closing PR $prNumber due to failure."
+            curl -s -S -X PATCH -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                 -H "Accept: application/vnd.github.v3+json" \
+                 -d '{"state": "closed"}' \
+                 https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$prNumber || true
+
+            curl -s -S -X POST -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                 -H "Accept: application/vnd.github.v3+json" \
+                 -d "{\"body\": \"Hi @$prAuthor, this pull request has been closed automatically because only members of the $allowedOrg organization can open pull requests. Please file an issue for further discussion if needed.\"}" \
+                 https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$prNumber/comments || true
+          }
+
+          {
+            echo "Checking if user $prAuthor is a member of $allowedOrg..."
+            response=$(curl -s -S -H "Authorization: Bearer ${{ secrets.ORG_READ_TOKEN }}" \
+                              -H "Accept: application/vnd.github.v3+json" \
+                              https://api.github.com/orgs/$allowedOrg/memberships/$prAuthor)
+
+            state=$(echo "$response" | jq -r '.state // empty')
+            if [[ "$state" == "active" ]]; then
+              echo "User $prAuthor is a member of $allowedOrg. PR remains open."
+            else
+              echo "User $prAuthor is not a member of $allowedOrg. Closing PR."
+              echo "Response: $response"
+              close_pr
+              exit 1
+            fi
+          } || {
+            echo "An error occurred during membership validation. Closing PR."
+            close_pr
+            exit 1
+          }

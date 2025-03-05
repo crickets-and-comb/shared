@@ -1,0 +1,74 @@
+name: Makefile Build Dist
+
+on:
+  workflow_call:
+    inputs:
+      DIST_DIR:
+        description: 'Directory to store dist files. Typically `dist/`.'
+        type: string
+        required: true
+      PYTHON_BUILD_VERSION:
+        description: 'Python version to build with.'
+        type: string
+        required: true
+      PYTHON_PACKAGE_DIST_NAME:
+        description: 'Name of the dist artifact to upload. Acts like a key.'
+        type: string
+        required: true
+      UPLOAD_DIST:
+        description: 'If passed `true`, upload dist artifact. Allows a test build locally without uploading.'
+        type: boolean
+        required: true
+    secrets:
+      CHECKOUT_SHARED:
+        required: true
+
+defaults:
+  run:
+    shell: bash -el {0}
+
+env:
+  CONDA_VERSION: latest
+
+jobs:
+  build-dist:
+    name: Build Dist
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set Default Branch
+        run: |
+          git config --global init.defaultBranch main
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.CHECKOUT_SHARED }}
+
+      - name: Setup Conda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-activate-base: false
+          miniconda-version: ${{ env.CONDA_VERSION }}
+          python-version: ${{ inputs.PYTHON_BUILD_VERSION}}
+
+      - name: Build Environment.
+        run: |
+          CONDA_ENV_NAME=build_dist_py${{ inputs.PYTHON_BUILD_VERSION}}
+          echo "CONDA_ENV_NAME=${CONDA_ENV_NAME}" >> $GITHUB_ENV
+
+          make build-env CONDA_ENV_NAME=${CONDA_ENV_NAME} PYTHON_VERSION=${{ inputs.PYTHON_BUILD_VERSION}}
+          conda run -n ${CONDA_ENV_NAME} make install INSTALL_EXTRAS=[build]
+
+      - name: Build Package
+        run: |
+          conda run -n ${{ env.CONDA_ENV_NAME }} make build-package DIST_DIR=${{ inputs.DIST_DIR }}
+
+      - name: Upload Package
+        if: ${{ inputs.UPLOAD_DIST }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.PYTHON_PACKAGE_DIST_NAME }}
+          path: ${{ inputs.DIST_DIR }}
+          overwrite: true

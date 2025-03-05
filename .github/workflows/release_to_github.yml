@@ -1,0 +1,93 @@
+name: Release to GitHub
+
+on:
+  workflow_call:
+    inputs:
+      DIST_DIR:
+        description: 'Directory to store dist files. Typically `dist/`.'
+        type: string
+        required: true
+      PYTHON_BUILD_VERSION:
+        description: 'Python version to use for misc tasks.'
+        type: string
+        required: true
+      PYTHON_PACKAGE_DIST_NAME:
+        description: 'Name of the dist artifact to upload. Acts like a key.'
+        type: string
+        required: true
+    secrets:
+      CHECKOUT_SHARED:
+        required: true
+
+defaults:
+  run:
+    shell: bash -el {0}
+
+jobs:
+  github-release:
+    name: Sign distribution with Sigstore and Upload to GitHub Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.CHECKOUT_SHARED }} # Token with full repo scope. # TODO: Figure out how to not use PAT?
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.PYTHON_BUILD_VERSION }}
+
+      - name: Download Dist
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.PYTHON_PACKAGE_DIST_NAME }}
+          path: ${{ inputs.DIST_DIR }}
+
+      - name: Sign Dist with Sigstore
+        uses: sigstore/gh-action-sigstore-python@v3.0.0
+        with:
+          inputs: >-
+            ./${{ inputs.DIST_DIR }}/*.tar.gz
+            ./${{ inputs.DIST_DIR }}/*.whl
+
+      - name: Get Version from Dist
+        id: extract_version
+        run: |
+          pip install pkginfo -c shared/constraints.txt
+          
+          tarball=$(ls ${{ inputs.DIST_DIR }}/*.tar.gz | head -n 1)
+          wheel=$(ls ${{ inputs.DIST_DIR }}/*.whl | head -n 1)
+
+          if [ -f "$tarball" ]; then
+            version=$(python -c "import pkginfo; info = pkginfo.get_metadata('$tarball'); print(info.version)")
+          elif [ -f "$wheel" ]; then
+            version=$(python -c "import pkginfo; info = pkginfo.get_metadata('$wheel'); print(info.version)")
+          else
+            echo "No distribution files found."
+            exit 1
+          fi
+
+          echo "VERSION_TAG=v$version" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: >-
+          gh release create
+          '${{ env.VERSION_TAG }}'
+          --repo '${{ github.repository }}'
+          --notes ""
+
+      - name: Upload Artifact Signatures to GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: >-
+          gh release upload
+          '${{ env.VERSION_TAG }}' ${{ inputs.DIST_DIR }}/**
+          --repo '${{ github.repository }}'

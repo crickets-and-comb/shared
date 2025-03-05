@@ -1,0 +1,64 @@
+name: Makefile Docs Deployment
+
+on:
+  workflow_call:
+    inputs:
+      PYTHON_BUILD_VERSION:
+        description: 'Python version to build with.'
+        type: string
+        required: true
+    secrets:
+      CHECKOUT_SHARED:
+        required: true
+
+defaults:
+  run:
+    shell: bash -el {0}
+
+env:
+  CONDA_VERSION: latest
+  DOC_BUILD_DIR: docs/_build/
+
+jobs:
+  deploy-doc:
+    name: Build and Deploy Documentation
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+
+    steps:
+      - name: Set Default Branch
+        run: |
+          git config --global init.defaultBranch main
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.CHECKOUT_SHARED }}
+
+      - name: Setup Conda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-activate-base: false
+          miniconda-version: ${{ env.CONDA_VERSION }}
+          python-version: ${{ inputs.PYTHON_BUILD_VERSION}}
+
+      - name: Build Environment
+        run: |
+          CONDA_ENV_NAME=build_doc_py${{ inputs.PYTHON_BUILD_VERSION}}
+          echo "CONDA_ENV_NAME=${CONDA_ENV_NAME}" >> $GITHUB_ENV
+
+          make build-env CONDA_ENV_NAME=${CONDA_ENV_NAME} PYTHON_VERSION=${{ inputs.PYTHON_BUILD_VERSION}}
+          conda run -n ${CONDA_ENV_NAME} make install INSTALL_EXTRAS=[doc]
+
+      - name: Build Documentation
+        run: |
+          conda run -n ${{ env.CONDA_ENV_NAME }} make build-doc
+
+      - name: Deploy Documentation
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ env.DOC_BUILD_DIR }}

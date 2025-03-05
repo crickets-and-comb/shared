@@ -1,0 +1,86 @@
+name: Makefile Test Install
+
+on:
+  workflow_call:
+    inputs:
+      RELEASE_VERSION:
+        description: 'Which version to release? If empty, will use version checked out in repo.'
+        type: string
+        required: false
+      TEST_OR_PROD:
+        description: 'Which published version to test? PyPi (prod) or TestPyPi (test)?'
+        type: string
+        required: true
+    secrets:
+      CHECKOUT_SHARED:
+        required: true
+
+defaults:
+  run:
+    shell: bash -el {0}
+
+env:
+  CONDA_VERSION: latest
+
+jobs:
+  test-published-package:
+    name: Test Published Package on (Test)PyPi
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: [3.11, 3.12, 3.13]
+
+    steps:
+      - name: Set Default Branch
+        run: |
+          git config --global init.defaultBranch main
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.CHECKOUT_SHARED }}
+
+      - name: Setup Conda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-activate-base: false
+          miniconda-version: ${{ env.CONDA_VERSION }}
+          python-version: ${{ matrix.python-version }}
+
+      - name: Build Environment
+        run: |
+          ENV_NAME=test_publish_to_pypi
+          echo "ENV_NAME=${ENV_NAME}" >> $GITHUB_ENV
+          conda create -n ${ENV_NAME} python=${{ matrix.python-version }} -y
+
+      - name: Install Package
+        run: |
+          PACKAGE_NAME=$(python -c "import configparser; cfg = configparser.ConfigParser(); cfg.read('setup.cfg'); print(cfg['metadata']['name'])")
+          echo "PACKAGE_NAME=${PACKAGE_NAME}" >> $GITHUB_ENV
+          PACKAGE_NAME_HYPHEN=$(echo ${PACKAGE_NAME} | tr '_' '-')
+
+          PACKAGE_VERSION=${{ inputs.RELEASE_VERSION }}
+          if [[ -z "${{ inputs.RELEASE_VERSION }}" ]]; then
+            PACKAGE_VERSION=$(python -c "import configparser; cfg = configparser.ConfigParser(); cfg.read('setup.cfg'); print(cfg['metadata']['version'])")
+          fi
+
+          # CVE-2018-20225 ignored here. --extra-index-url usage is secure in this context.
+          TEST_PYPI_FLAG=""
+          if [[ "${{ inputs.TEST_OR_PROD }}" == "test" ]]; then
+            TEST_PYPI_FLAG="-i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/"
+          fi
+
+          conda run -n ${{ env.ENV_NAME }} pip install ${TEST_PYPI_FLAG} ${PACKAGE_NAME_HYPHEN}==${PACKAGE_VERSION}
+
+      - name: Run Tests
+        run: |
+          conda activate ${{ env.ENV_NAME }}
+          python -c "import ${{ env.PACKAGE_NAME }}"
+          pip install pytest
+          if [[ "${{ matrix.os }}" == *"windows"* ]]; then
+            pytest tests\\
+          else
+            pytest tests/
+          fi
