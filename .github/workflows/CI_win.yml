@@ -53,7 +53,7 @@ jobs:
       - name: Run QC
         if: ${{ matrix.python-version != '3.13' && contains(matrix.os, 'ubuntu') }}
         run: |
-          conda run -n ${{ env.DEV_ENV_NAME }} make lint SAFETY_API_KEY=${{ secrets.SAFETY_API_KEY }} security typecheck
+          conda run -n ${{ env.DEV_ENV_NAME }} make full-qc SAFETY_API_KEY=${{ secrets.SAFETY_API_KEY }}
 
       - name: Run Tests
         run: |
