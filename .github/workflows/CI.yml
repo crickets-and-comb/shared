@@ -57,7 +57,7 @@ jobs:
 
       - name: Run Tests
         run: |
-          conda run -n ${{ env.DEV_ENV_NAME }} make unit integration e2e
+          conda run -n ${{ env.DEV_ENV_NAME }} make full-test
 
       - name: Build Doc
         run: |
