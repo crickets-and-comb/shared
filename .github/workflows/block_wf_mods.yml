@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
         ALLOWED_USERS:
-            description: 'GitHub users that are allowed to modify workflow files.'
+            description: 'Comma-separated list of GitHub users that are allowed to modify workflow files.'
             type: string
             required: false
 

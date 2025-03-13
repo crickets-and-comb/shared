@@ -7,6 +7,10 @@ on:
         description: 'GitHub organization name that is allowed to open PRs.'
         type: string
         required: true
+      ALLOWED_USERS:
+        description: 'Comma-separated list of GitHub users who are allowed to open PRs even if they are not in the organization.'
+        type: string
+        required: false
     secrets:
       ORG_READ_TOKEN:
         required: true
@@ -39,6 +43,14 @@ jobs:
                  -d "{\"body\": \"Hi @$prAuthor, this pull request has been closed automatically because only members of the $allowedOrg organization can open pull requests. Please file an issue for further discussion if needed.\"}" \
                  https://api.github.com/repos/$GITHUB_REPOSITORY/issues/$prNumber/comments || true
           }
+
+          IFS=',' read -ra ALLOWED_USERS <<< "$allowedUsersList"
+          for user in "${ALLOWED_USERS[@]}"; do
+            if [[ "$prAuthor" == "$user" ]]; then
+              echo "User $prAuthor is explicitly allowed. PR remains open."
+              exit 0
+            fi
+          done
 
           {
             echo "Checking if user $prAuthor is a member of $allowedOrg..."
