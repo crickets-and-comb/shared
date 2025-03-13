@@ -18,7 +18,7 @@ defaults:
 jobs:
   close-external-prs:
     runs-on: ubuntu-latest
-    steps:
+    steps: # TODO: Should GITHUB_TOKEN be inherited/passed?
       - name: Check PR Author and Close If External
         run: |
           set -e
