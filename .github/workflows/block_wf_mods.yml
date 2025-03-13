@@ -1,0 +1,13 @@
+name: Block Workflow Modifications
+
+on:
+  workflow_call:
+
+jobs:
+  block:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if workflow files are modified
+        run: |
+          echo "Modifications to .github/workflows are not allowed in pull requests."
+          exit 1
