@@ -40,7 +40,7 @@ jobs:
           done
 
           {
-            echo "🔍 Checking if user $prAuthor is a member of $allowedOrg..."
+            echo "Checking if user $prAuthor is a member of $allowedOrg..."
             response=$(curl -s -S -H "Authorization: Bearer ${{ secrets.ORG_READ_TOKEN }}" \
                               -H "Accept: application/vnd.github.v3+json" \
                               https://api.github.com/orgs/$allowedOrg/memberships/$prAuthor)
@@ -54,7 +54,7 @@ jobs:
               echo "Response: $response"
             fi
           } || {
-            echo "⚠️ An error occurred during membership validation. Closing PR as a precaution."
+            echo "An error occurred during membership validation. Closing PR as a precaution."
           }
 
       - name: Close PR if blocked
