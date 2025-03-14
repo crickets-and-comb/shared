@@ -70,5 +70,3 @@ jobs:
       PR_NUMBER: ${{ github.event.pull_request.number }}
       PR_AUTHOR: ${{ github.actor }}
       REASON: "Only members of ${{ inputs.ALLOWED_ORG }} or explicitly allowed users can open pull requests. Please file an issue for discussion if needed."
-    secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
