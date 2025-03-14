@@ -31,7 +31,7 @@ jobs:
 
   close-pr:
     needs: block
-    if: needs.close-external-prs.outputs.should_close == 'true'
+    if: needs.block.outputs.should_close == 'true'
     uses: crickets-and-comb/shared/.github/workflows/close_pr.yml@main
     with:
       PR_NUMBER: ${{ github.event.pull_request.number }}
