@@ -9,5 +9,4 @@ jobs:
     with:
       ALLOWED_ORG: "crickets-and-comb"
     secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       ORG_READ_TOKEN: ${{ secrets.ORG_READ_TOKEN }}
