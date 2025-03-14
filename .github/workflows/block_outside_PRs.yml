@@ -35,12 +35,11 @@ jobs:
           for user in "${ALLOWED_USERS[@]}"; do
             if [[ "$prAuthor" == "$user" ]]; then
               echo "User $prAuthor is explicitly allowed. PR remains open."
-              exit 0
             fi
           done
 
           {
-            echo "🔍 Checking if user $prAuthor is a member of $allowedOrg..."
+            echo "Checking if user $prAuthor is a member of $allowedOrg..."
             response=$(curl -s -S -H "Authorization: Bearer ${{ secrets.ORG_READ_TOKEN }}" \
                               -H "Accept: application/vnd.github.v3+json" \
                               https://api.github.com/orgs/$allowedOrg/memberships/$prAuthor)
@@ -48,16 +47,18 @@ jobs:
             state=$(echo "$response" | jq -r '.state // empty')
             if [[ "$state" == "active" ]]; then
               echo "User $prAuthor is a member of $allowedOrg. PR remains open."
-              exit 0
             else
               echo "User $prAuthor is not a member of $allowedOrg. Closing PR."
               echo "Response: $response"
+              echo "block=true" >> "$GITHUB_ENV"
             fi
           } || {
-            echo "⚠️ An error occurred during membership validation. Closing PR as a precaution."
+            echo "An error occurred during membership validation. Closing PR as a precaution."
+            echo "block=true" >> "$GITHUB_ENV"
           }
 
       - name: Close PR if blocked
+        if: env.block == 'true'
         uses: ./.github/workflows/close_pr.yml
         with:
           PR_NUMBER: ${{ github.event.pull_request.number }}

@@ -17,16 +17,18 @@ jobs:
           ALLOWED_USERS_LIST="${{ inputs.ALLOWED_USERS }}"
           IFS=',' read -ra ALLOWED_USERS <<< "$ALLOWED_USERS_LIST"
 
+          echo "block=true" >> "$GITHUB_ENV"
           for user in "${ALLOWED_USERS[@]}"; do
             if [[ "$GITHUB_ACTOR" == "$user" ]]; then
               echo "User $GITHUB_ACTOR is allowed to modify workflow files."
-              exit 0
+              echo "block=false" >> "$GITHUB_ENV"
             fi
           done
 
           echo "User $GITHUB_ACTOR is NOT allowed to modify workflow files."
 
       - name: Close PR if blocked
+        if: env.block == 'true'
         uses: ./.github/workflows/close_pr.yml
         with:
           PR_NUMBER: ${{ github.event.pull_request.number }}
