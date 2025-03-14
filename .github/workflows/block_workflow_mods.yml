@@ -20,15 +20,15 @@ jobs:
           ALLOWED_USERS_LIST="${{ inputs.ALLOWED_USERS }}"
           IFS=',' read -ra ALLOWED_USERS <<< "$ALLOWED_USERS_LIST"
 
+          echo "should_close=true" >> $GITHUB_OUTPUT
+
           for user in "${ALLOWED_USERS[@]}"; do
             if [[ "$GITHUB_ACTOR" == "$user" ]]; then
               echo "User $GITHUB_ACTOR is allowed to modify workflow files."
               echo "should_close=false" >> $GITHUB_OUTPUT
             fi
           done
-
-          echo "User $GITHUB_ACTOR is NOT allowed to modify workflow files."
-          echo "should_close=true" >> $GITHUB_OUTPUT
+          
 
   close-pr:
     needs: block

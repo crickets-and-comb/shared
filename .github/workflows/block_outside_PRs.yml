@@ -30,6 +30,8 @@ jobs:
         run: |
           set -e
 
+          echo "should_close=true" >> $GITHUB_OUTPUT # For good measure.
+
           prAuthor=$(jq -r '.pull_request.user.login' < "$GITHUB_EVENT_PATH")
           allowedOrg=${{ inputs.ALLOWED_ORG }}
           prNumber=$(jq -r '.pull_request.number' < "$GITHUB_EVENT_PATH")
@@ -61,7 +63,6 @@ jobs:
             echo "An error occurred during membership validation. Closing PR as a precaution."
             echo "should_close=true" >> $GITHUB_OUTPUT
           }
-          echo "should_close=true" >> $GITHUB_OUTPUT # For good measure.
 
   close-pr:
     needs: close-external-prs
