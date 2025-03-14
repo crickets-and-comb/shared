@@ -14,6 +14,8 @@ on:
     secrets:
       ORG_READ_TOKEN:
         required: true
+      GITHUB_TOKEN:
+        required: true
 
 defaults:
   run:
@@ -22,7 +24,7 @@ defaults:
 jobs:
   close-external-prs:
     runs-on: ubuntu-latest
-    steps: # TODO: Should GITHUB_TOKEN be inherited/passed? Here and elsewhere? (Need to define the secret.)
+    steps:
       - name: Check PR Author and Close If External
         run: |
           set -e
