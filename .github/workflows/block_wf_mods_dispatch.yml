@@ -2,11 +2,11 @@ name: Block Workflow Modifications Dispatch
 
 on:
   pull_request_target:
-    paths:
-      - '.github/workflows/**'
 
 jobs:
   close-wf-mods-pr:
     uses: ./.github/workflows/block_wf_mods.yml
     with:
       ALLOWED_USERS: "KalebCoberly"
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
