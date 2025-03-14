@@ -1,0 +1,34 @@
+name: Block Workflow Modifications
+
+on:
+  workflow_call:
+    inputs:
+      ALLOWED_USERS:
+        description: 'Comma-separated list of GitHub users that are allowed to modify workflow files.'
+        type: string
+        required: false
+
+jobs:
+  block:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if GITHUB_ACTOR is allowed
+        run: |
+          ALLOWED_USERS_LIST="${{ inputs.ALLOWED_USERS }}"
+          IFS=',' read -ra ALLOWED_USERS <<< "$ALLOWED_USERS_LIST"
+
+          for user in "${ALLOWED_USERS[@]}"; do
+            if [[ "$GITHUB_ACTOR" == "$user" ]]; then
+              echo "User $GITHUB_ACTOR is allowed to modify workflow files."
+              exit 0
+            fi
+          done
+
+          echo "User $GITHUB_ACTOR is NOT allowed to modify workflow files."
+
+      - name: Close PR if blocked
+        uses: ./.github/workflows/close_pr.yml
+        with:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_AUTHOR: ${{ github.actor }}
+          REASON: "Workflow file modifications are restricted. Please contact a repository administrator if this is an error."
