@@ -61,7 +61,8 @@ jobs:
           exit 1 # For good measure.
 
   close-pr:
-    if: failure()
+    needs: close-external-prs
+    if: needs.close-external-prs.result == 'failure'
     uses: crickets-and-comb/shared/.github/workflows/close_pr.yml@main
     with:
       PR_NUMBER: ${{ github.event.pull_request.number }}
