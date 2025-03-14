@@ -8,5 +8,3 @@ on:
 jobs:
   close-wf-mods-pr:
     uses: ./.github/workflows/block_workflow_mods.yml
-    with:
-      ALLOWED_USERS: "KalebCoberly"
