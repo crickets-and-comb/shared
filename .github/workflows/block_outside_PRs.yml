@@ -14,8 +14,6 @@ on:
     secrets:
       ORG_READ_TOKEN:
         required: true
-      GITHUB_TOKEN:
-        required: true
 
 defaults:
   run:
