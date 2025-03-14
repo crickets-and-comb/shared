@@ -2,7 +2,7 @@ name: Block Workflow Modifications Dispatch
 
 on:
   pull_request_target:
-    paths:
+    paths: # Dummy comment to force a change.
       - '.github/workflows/**'
 
 jobs:
