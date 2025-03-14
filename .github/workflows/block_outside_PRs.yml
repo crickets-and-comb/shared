@@ -52,12 +52,16 @@ jobs:
             else
               echo "User $prAuthor is not a member of $allowedOrg. Closing PR."
               echo "Response: $response"
+              exit 1
             fi
           } || {
             echo "An error occurred during membership validation. Closing PR as a precaution."
+            exit 1
           }
+          exit 1 # For good measure.
 
   close-pr:
+    if: failure()
     uses: crickets-and-comb/shared/.github/workflows/close_pr.yml@main
     with:
       PR_NUMBER: ${{ github.event.pull_request.number }}
