@@ -3,38 +3,67 @@ name: Block Workflow Modifications
 on:
   workflow_call:
     inputs:
-        ALLOWED_USERS:
-            description: 'Comma-separated list of GitHub users that are allowed to modify workflow files.'
-            type: string
-            required: false
+      ALLOWED_USERS:
+        description: 'Comma-separated list of GitHub users that are allowed to modify workflow files.'
+        type: string
+        required: false
+
+    secrets:
+      GITHUB_TOKEN:
+        required: true
 
 jobs:
   block:
     runs-on: ubuntu-latest
     steps:
-        - name: Check if GITHUB_ACTOR is allowed
-          run: |
-            ALLOWED_USERS_LIST="${{ inputs.ALLOWED_USERS }}"
-            IFS=',' read -ra ALLOWED_USERS <<< "$ALLOWED_USERS_LIST"
+      - name: Check if GITHUB_ACTOR is allowed
+        id: check-user
+        run: |
+          ALLOWED_USERS_LIST="${{ inputs.ALLOWED_USERS }}"
+          IFS=',' read -ra ALLOWED_USERS <<< "$ALLOWED_USERS_LIST"
 
-            for user in "${ALLOWED_USERS[@]}"; do
-              if [[ "$GITHUB_ACTOR" == "$user" ]]; then
-                echo "User $GITHUB_ACTOR is allowed to modify workflow files."
-                exit 0
-              fi
-            done
+          for user in "${ALLOWED_USERS[@]}"; do
+            if [[ "$GITHUB_ACTOR" == "$user" ]]; then
+              echo "User $GITHUB_ACTOR is allowed to modify workflow files."
+              exit 0
+            fi
+          done
 
-            echo "User $GITHUB_ACTOR is NOT allowed to modify workflow files."
-            exit 1
-        - name: Comment on PR if blocked
-          if: failure()  # Only runs if the previous step fails
-          uses: actions/github-script@v7
-          with:
-            github-token: ${{ secrets.GITHUB_TOKEN }}
-            script: |
-              github.rest.issues.createComment({
-                issue_number: context.payload.pull_request.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: `**Workflow file modifications are restricted.**\n\nUser **${{ github.actor }}** is not in the allowed list.\n\nPlease contact a repository administrator if this is an error.`
-              })
+          echo "User $GITHUB_ACTOR is NOT allowed to modify workflow files."
+          echo "block=true" >> "$GITHUB_ENV"
+
+      - name: Check for workflow file modifications
+        id: check-changes
+        run: |
+          PR_NUMBER=$(jq -r '.pull_request.number' < "$GITHUB_EVENT_PATH")
+          MODIFIED_FILES=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER/files --jq '.[].filename')
+
+          echo "Modified files in PR:"
+          echo "$MODIFIED_FILES"
+
+          if echo "$MODIFIED_FILES" | grep -q '^.github/workflows/'; then
+            echo "Workflow files have been modified."
+            echo "workflows_modified=true" >> "$GITHUB_ENV"
+          else
+            echo "No workflow files modified."
+            echo "workflows_modified=false" >> "$GITHUB_ENV"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment and close PR if necessary
+        if: env.workflows_modified == 'true' && env.block == 'true'
+        run: |
+          PR_NUMBER=$(jq -r '.pull_request.number' < "$GITHUB_EVENT_PATH")
+          echo "Closing PR $PR_NUMBER due to unauthorized workflow modifications."
+
+          # Post comment on the PR
+          gh api repos/${{ github.repository }}/issues/$PR_NUMBER/comments \
+            -X POST -F "body=**Workflow file modifications are restricted.**\n\nUser **${{ github.actor }}** is not in the allowed list.\n\nPlease contact a repository administrator if this is an error." \
+            --silent
+
+          # Close the PR
+          gh api repos/${{ github.repository }}/pulls/$PR_NUMBER \
+            -X PATCH -F "state=closed" --silent
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
