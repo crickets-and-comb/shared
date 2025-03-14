@@ -19,7 +19,7 @@ defaults:
   run:
     shell: bash -el {0}
 
-jobs:
+jobs: # Dummy comment.
   close-external-prs:
     runs-on: ubuntu-latest
     outputs:
