@@ -12,9 +12,10 @@ jobs:
   block:
     runs-on: ubuntu-latest
     outputs:
-      should_close: ${{ steps.set-output.outputs.should_close }}
+      should_close: ${{ steps.check-user.outputs.should_close }}
     steps:
       - name: Check if GITHUB_ACTOR is allowed
+        id: check-user
         run: |
           ALLOWED_USERS_LIST="${{ inputs.ALLOWED_USERS }}"
           IFS=',' read -ra ALLOWED_USERS <<< "$ALLOWED_USERS_LIST"

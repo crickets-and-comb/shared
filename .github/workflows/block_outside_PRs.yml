@@ -23,9 +23,10 @@ jobs:
   close-external-prs:
     runs-on: ubuntu-latest
     outputs:
-      should_close: ${{ steps.set-output.outputs.should_close }}
+      should_close: ${{ steps.check-permission.outputs.should_close }}
     steps:
       - name: Check PR Author and Close If External
+        id: check-permission
         run: |
           set -e
 
