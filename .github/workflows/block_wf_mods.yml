@@ -1,0 +1,40 @@
+name: Block Workflow Modifications
+
+on:
+  workflow_call:
+    inputs:
+        ALLOWED_USERS:
+            description: 'Comma-separated list of GitHub users that are allowed to modify workflow files.'
+            type: string
+            required: false
+
+jobs:
+  block:
+    runs-on: ubuntu-latest
+    steps:
+        - name: Check if GITHUB_ACTOR is allowed
+          run: |
+            ALLOWED_USERS_LIST="${{ inputs.ALLOWED_USERS }}"
+            IFS=',' read -ra ALLOWED_USERS <<< "$ALLOWED_USERS_LIST"
+
+            for user in "${ALLOWED_USERS[@]}"; do
+              if [[ "$GITHUB_ACTOR" == "$user" ]]; then
+                echo "User $GITHUB_ACTOR is allowed to modify workflow files."
+                exit 0
+              fi
+            done
+
+            echo "User $GITHUB_ACTOR is NOT allowed to modify workflow files."
+            exit 1
+        - name: Comment on PR if blocked
+          if: failure()  # Only runs if the previous step fails
+          uses: actions/github-script@v7
+          with:
+            github-token: ${{ secrets.GITHUB_TOKEN }}
+            script: |
+              github.rest.issues.createComment({
+                issue_number: context.payload.pull_request.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `**Workflow file modifications are restricted.**\n\nUser **${{ github.actor }}** is not in the allowed list.\n\nPlease contact a repository administrator if this is an error.`
+              })
