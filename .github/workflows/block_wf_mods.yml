@@ -35,6 +35,7 @@ jobs:
       - name: Check for workflow file modifications
         id: check-changes
         run: |
+          echo "PR_NUMBER: $PR_NUMBER"
           MODIFIED_FILES=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER/files --jq '.[].filename')
 
           echo "Modified files in PR:"
