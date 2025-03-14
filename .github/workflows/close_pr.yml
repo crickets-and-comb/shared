@@ -1,0 +1,35 @@
+name: Close PR
+
+on:
+  workflow_call:
+    inputs:
+      PR_NUMBER:
+        description: 'Pull request number to close'
+        type: string
+        required: true
+      PR_AUTHOR:
+        description: 'GitHub username of the PR author'
+        type: string
+        required: true
+      REASON:
+        description: 'Reason for closing the PR'
+        type: string
+        required: true
+
+jobs:
+  close-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close Pull Request
+        run: |
+          echo "Closing PR #${{ inputs.PR_NUMBER }}: ${{ inputs.REASON }}"
+
+          curl -s -S -X PATCH -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3+json" \
+               -d '{"state": "closed"}' \
+               https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/${{ inputs.PR_NUMBER }} || true
+
+          curl -s -S -X POST -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3+json" \
+               -d "{\"body\": \"**Pull request closed**\n\nHi @${{ inputs.PR_AUTHOR }}, this PR was closed automatically. Reason: ${{ inputs.REASON }}\"}" \
+               https://api.github.com/repos/$GITHUB_REPOSITORY/issues/${{ inputs.PR_NUMBER }}/comments || true
