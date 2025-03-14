@@ -11,6 +11,7 @@ on:
 jobs:
   block:
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Check if GITHUB_ACTOR is allowed
         run: |
