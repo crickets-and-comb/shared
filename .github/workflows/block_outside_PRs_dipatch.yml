@@ -1,10 +1,7 @@
 name: Dispatch Restrict External PRs
 
 on:
-  workflow_run:
-    workflows: ["Block Workflow Modifications Dispatch"]
-    types:
-      - completed
+  pull_request_target:
 
 jobs:
   close-external-prs:
