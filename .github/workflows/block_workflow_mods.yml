@@ -11,7 +11,8 @@ on:
 jobs:
   block:
     runs-on: ubuntu-latest
-    continue-on-error: true
+    outputs:
+      should_close: ${{ steps.set-output.outputs.should_close }}
     steps:
       - name: Check if GITHUB_ACTOR is allowed
         run: |
@@ -21,16 +22,16 @@ jobs:
           for user in "${ALLOWED_USERS[@]}"; do
             if [[ "$GITHUB_ACTOR" == "$user" ]]; then
               echo "User $GITHUB_ACTOR is allowed to modify workflow files."
-              exit 0
+              echo "should_close=false" >> $GITHUB_OUTPUT
             fi
           done
 
           echo "User $GITHUB_ACTOR is NOT allowed to modify workflow files."
-          exit 1
+          echo "should_close=true" >> $GITHUB_OUTPUT
 
   close-pr:
     needs: block
-    if: needs.block.result == 'failure'
+    if: needs.close-external-prs.outputs.should_close == 'true'
     uses: crickets-and-comb/shared/.github/workflows/close_pr.yml@main
     with:
       PR_NUMBER: ${{ github.event.pull_request.number }}

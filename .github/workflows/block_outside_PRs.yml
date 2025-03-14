@@ -22,7 +22,8 @@ defaults:
 jobs:
   close-external-prs:
     runs-on: ubuntu-latest
-    continue-on-error: true
+    outputs:
+      should_close: ${{ steps.set-output.outputs.should_close }}
     steps:
       - name: Check PR Author and Close If External
         run: |
@@ -36,7 +37,7 @@ jobs:
           for user in "${ALLOWED_USERS[@]}"; do
             if [[ "$prAuthor" == "$user" ]]; then
               echo "User $prAuthor is explicitly allowed. PR remains open."
-              exit 0
+              echo "should_close=false" >> $GITHUB_OUTPUT
             fi
           done
 
@@ -49,23 +50,25 @@ jobs:
             state=$(echo "$response" | jq -r '.state // empty')
             if [[ "$state" == "active" ]]; then
               echo "User $prAuthor is a member of $allowedOrg. PR remains open."
-              exit 0
+              echo "should_close=false" >> $GITHUB_OUTPUT
             else
               echo "User $prAuthor is not a member of $allowedOrg. Closing PR."
               echo "Response: $response"
-              exit 1
+              echo "should_close=true" >> $GITHUB_OUTPUT
             fi
           } || {
             echo "An error occurred during membership validation. Closing PR as a precaution."
-            exit 1
+            echo "should_close=true" >> $GITHUB_OUTPUT
           }
-          exit 1 # For good measure.
+          echo "should_close=true" >> $GITHUB_OUTPUT # For good measure.
 
   close-pr:
     needs: close-external-prs
-    if: needs.close-external-prs.result == 'failure'
+    if: needs.close-external-prs.outputs.should_close == 'true'
     uses: crickets-and-comb/shared/.github/workflows/close_pr.yml@main
     with:
       PR_NUMBER: ${{ github.event.pull_request.number }}
       PR_AUTHOR: ${{ github.actor }}
       REASON: "Only members of ${{ inputs.ALLOWED_ORG }} or explicitly allowed users can open pull requests. Please file an issue for discussion if needed."
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
