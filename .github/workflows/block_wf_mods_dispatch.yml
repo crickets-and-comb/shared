@@ -1,7 +1,10 @@
 name: Block Workflow Modifications Dispatch
 
 on:
-  pull_request_target:
+  workflow_run:
+    workflows: ["Dispatch Restrict External PRs"]
+    types:
+      - completed
 
 jobs:
   close-wf-mods-pr:
