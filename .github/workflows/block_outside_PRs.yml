@@ -1,5 +1,5 @@
 name: Restrict External PRs
-
+# Dummy comment to trigger a change.
 on:
   workflow_call:
     inputs:
