@@ -7,6 +7,10 @@ on:
         description: 'Comma-separated list of GitHub users that are allowed to modify workflow files.'
         type: string
         required: false
+      PR_NUMBER:
+        description: 'Pull request number'
+        type: string
+        required: true
 
 jobs:
   block:
@@ -31,7 +35,6 @@ jobs:
       - name: Check for workflow file modifications
         id: check-changes
         run: |
-          PR_NUMBER=$(jq -r '.pull_request.number' < "$GITHUB_EVENT_PATH")
           MODIFIED_FILES=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER/files --jq '.[].filename')
 
           echo "Modified files in PR:"

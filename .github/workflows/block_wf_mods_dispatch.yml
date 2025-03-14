@@ -11,4 +11,5 @@ jobs:
     uses: ./.github/workflows/block_wf_mods.yml
     with:
       ALLOWED_USERS: "KalebCoberly"
+      PR_NUMBER: ${{ github.event.pull_request.number }}
     secrets: inherit
