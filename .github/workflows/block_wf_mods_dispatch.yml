@@ -10,5 +10,3 @@ jobs:
     uses: ./.github/workflows/block_wf_mods.yml
     with:
       ALLOWED_USERS: "KalebCoberly"
-    secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
