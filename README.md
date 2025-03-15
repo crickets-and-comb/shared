@@ -28,11 +28,7 @@ Once you've done that, or if this shared repo has already been added to a repo y
 
 See https://git-scm.com/book/en/v2/Git-Tools-Submodules
 
-### Initializing at cloning
-
-If you haven't yet cloned a repo that contains this shared submodule, you can initialize this submodule upon cloning. For example if cloning `reference_package`:
-
-  $ git clone --recurse-submodules https://github.com/crickets-and-comb/reference_package
+You'll need to cd into shared and checkout main, as it starts as a detached head, and that can cause problems with updating later with git submodule update. It's a good practice to just cd in shared and checkout and update the branch you want (typically main) directly, instead of using git submodule update.
 
 ### Setting tokens and keys
 
