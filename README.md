@@ -28,12 +28,6 @@ Once you've done that, or if this shared repo has already been added to a repo y
 
 See https://git-scm.com/book/en/v2/Git-Tools-Submodules
 
-### Initializing at cloning
-
-If you haven't yet cloned a repo that contains this shared submodule, you can initialize this submodule upon cloning. For example if cloning `reference_package`:
-
-  $ git clone --recurse-submodules https://github.com/crickets-and-comb/reference_package
-
 ### Setting tokens and keys
 
 The shared workflows rely on a Personal Access Token (PAT) (to checkout this submodule so they can use the make targets). You need to create a PAT with repo access and add it to the consuming repo's action secrets as `CHECKOUT_SHARED`. See GitHub for how to set up PATs (hint: check the developer settings on your personal account) and how to add secrets to a repo's actions (hint: check the repo's settings).
