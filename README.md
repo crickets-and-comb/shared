@@ -28,6 +28,8 @@ Once you've done that, or if this shared repo has already been added to a repo y
 
 See https://git-scm.com/book/en/v2/Git-Tools-Submodules
 
+You'll need to cd into shared and checkout main, as it starts as a detached head, and that can cause problems with updating later with git submodule update. It's a good practice to just cd in shared and checkout and update the branch you want (typically main) directly, instead of using git submodule update.
+
 ### Setting tokens and keys
 
 The shared workflows rely on a Personal Access Token (PAT) (to checkout this submodule so they can use the make targets). You need to create a PAT with repo access and add it to the consuming repo's action secrets as `CHECKOUT_SHARED`. See GitHub for how to set up PATs (hint: check the developer settings on your personal account) and how to add secrets to a repo's actions (hint: check the repo's settings).
