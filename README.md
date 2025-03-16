@@ -146,7 +146,9 @@ jobs:
     secrets: inherit
 ```
 
-It's not strictly necessary that they are relative in `CI_CD_act.yml`, but this ensures you're running your local workflows instead of what's on main in GitHub. Using relative paths when running with `act` is only truly necessary if you've overridden a make target from the shared `Makefile` in your consuming repo's file, otherwise `act` will continue to use the shared version of the make target. For instance, you need to use a relative path to `shared/.github/workflows/CI.yml` if you've overridden `full-test` in your consuming repo's `Makefile`, because that shared workflow calls the `full-test` make target -- e.g., if you've done this in your `Makefile`:
+Note also that, GitHub actions will fail if it sees a workflow using relative paths for workflow calls. This means that you will need to add `CI_CD_act.yml` to `.gitignore`.
+
+It's not strictly necessary that the paths are relative in `CI_CD_act.yml`, but this ensures you're running your local workflows instead of what's on main in GitHub. Using relative paths when running with `act` is only truly necessary if you've overridden a make target from the shared `Makefile` in your consuming repo's file, otherwise `act` will continue to use the shared version of the make target. For instance, you need to use a relative path to `shared/.github/workflows/CI.yml` if you've overridden `full-test` in your consuming repo's `Makefile`, because that shared workflow calls the `full-test` make target -- e.g., if you've done this in your `Makefile`:
 
 ```
 export
@@ -156,7 +158,11 @@ full-test: # Run all the tests. (NOTE: this means running `run-act` requires swi
 	$(MAKE) unit
 ```
 
-Further, in order to checkout the right commit of the submodule when testing a workflow on GitHub, you'll need to check a couple of things. First, make sure you have the branch set in your consuming repo's `.gitmodules` file. Second, make sure you've committed, in the consuming repo, the commit hash you're testing of the shared repo submodule.
+If you don't override any relevant shared make targets you may wish instead to always use the GitHub URLs and thus just call the same CI/CD workflow from `run-act` as GitHub. You'd then simply override the `run-act` target in your `Makefile` as `full-test` is overridden above, copying it from the shared `Makefile` and changing the file name from `CI_CD_act.yml` to whatever you named your CI/CD workflow file (e.g., `CI_CD.yml` to follow the convention used throughout).
+
+You may occasionally want to test out local changes to your workflows or shared workflows. You would just then need to switch the workflow call paths to relative paths while testing locally and switch them back to GitHub URLs before pushing to GitHub.
+
+Or, you may want to use GitHub to test out the changes you pushed to the shared branch you're developing in. To checkout the right commit of the shared submodule when testing a workflow on GitHub, you'll need to check a few things. First, make sure you have the branch set in your consuming repo's `.gitmodules` file. Second, make sure you've committed, in the consuming repo, the commit hash you're testing of the shared repo submodule. Thirdly, make sure the workflow call URLs are set to the dev branch like  `crickets-and-comb/shared/.github/workflows/CI.yml@dev-branch`.
 
 It's tricky developing shared workflows, but if you're just developing the consuming repo's package itself, you shouldn't need to even use `run-act`. The `full*` make targets in `Makefile` should suffice. They will run on your local machine without Docker and will look in your shared submodule without any special direction.
 
