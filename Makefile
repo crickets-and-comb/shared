@@ -14,6 +14,7 @@ DOC_BUILD_DIR ?= docs/_build/
 DIST_DIR ?= dist/
 
 ACT_RUN_EVENT ?= workflow_dispatch
+CI_CD_FILE_NAME ?= CI_CD.yml
 MATRIX_OS ?= ubuntu-latest
 MATRIX_PYTHON_VERSION ?=
 TEST_OR_PROD ?= dev
@@ -93,11 +94,19 @@ build-package: # Build the package to deploy.
 	python -m build ${REPO_ROOT}
 	twine check ${DIST_DIR}/*
 
+set-CI-CD-file: # Override to update the CI-CD file for run-act, e.g. to use local shared workflows instead of via GitHub URLs.
+	echo "No changes made to CI-CD file."
+	# e.g.
+	# perl -pi -e 's|crickets-and-comb/shared/.github/workflows/CI\.yml\@main|./shared/.github/workflows/CI.yml|g' .github/workflows/CI_CD_act.yml
+
 # TODO: Fix reusables to take matrix flags?
 run-act: # Run the CI-CD workflow.
 	$(eval MATRIX_OS_FLAG := $(if $(MATRIX_OS),--matrix os:${MATRIX_OS},))
 	$(eval MATRIX_PYTHON_VERSION_FLAG := $(if $(MATRIX_PYTHON_VERSION),--matrix python-version:${MATRIX_PYTHON_VERSION},))
 	$(eval PYTHON_BUILD_VERSION := $(if $(MATRIX_PYTHON_VERSION),${MATRIX_PYTHON_VERSION},${PYTHON_VERSION}))
+
+	cp .github/workflows/${CI_CD_FILE_NAME} .github/workflows/CI_CD_act.yml
+	$(MAKE) set-CI-CD-file
 
 	act ${ACT_RUN_EVENT} -W .github/workflows/CI_CD_act.yml --defaultbranch main ${MATRIX_OS_FLAG} ${MATRIX_PYTHON_VERSION_FLAG} \
 		-s CHECKOUT_SHARED=${CHECKOUT_SHARED} -s ORG_READ_TOKEN=${ORG_READ_TOKEN} -s SAFETY_API_KEY=${SAFETY_API_KEY} \
