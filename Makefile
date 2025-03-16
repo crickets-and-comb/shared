@@ -70,12 +70,6 @@ security: # Check for vulnerabilities.
 typecheck: # Check typing.
 	pytype --config=${REPO_ROOT}shared/pytype.cfg -- ${QC_DIRS}
 
-# Parametrized test function for the test targets (unit, integration, e2e).
-test_function = pytest -m $(1) ${REPO_ROOT} \
-	--rootdir ${REPO_ROOT} \
-	-c ${REPO_ROOT}pyproject.toml \
-	--cov
-
 run-test: # Base call to pytest. (Export MARKER to specify the test type.)
 	pytest -m ${MARKER} ${REPO_ROOT} --rootdir ${REPO_ROOT} -c ${REPO_ROOT}pyproject.toml
 
