@@ -120,13 +120,13 @@ You can use a make target for that:
 
   $ make run-act
 
-That will run `.github/workflows/CI_CD.yml`. But, you can also run any workflow you'd like by using `act` directly. See https://nektosact.com.
+That will run `.github/workflows/CI_CD_act.yml`. But, you can also run any workflow you'd like by using `act` directly. See https://nektosact.com.
 
 To use this tool, you'll need to have Docker installed and running on your machine: https://www.docker.com/. You'll also need to install `act` in your terminal:
 
   $ brew install act
 
-Additionally, you'll need to change the URL references to the shared workflows wherever you're calling them. `act` looks at your local files and does not follow the GitHub URL. It will fail when it tries to find the shared workflow. So, you need to point it to the local submodule. For instance, if you're calling this:
+Note that `run-act` calls `CI_CD_act.yml` and not `CI_CD.yml`. You will need to create a file called `CI_CD_act.yml` that is identical to your `CI_CD.yml` file (or whatever you name it), with the only difference being that the paths used to call shared workflows should be relative in `CI_CD_act.yml` instead of GitHub URLs like in `CI_CD.yml`. So, for instance, if you have this job in `CI_CD.yml`:
 
 ```YML
 jobs:
@@ -136,7 +136,7 @@ jobs:
     secrets: inherit
 ```
 
-Change it to:
+Change it to this in `CI_CD_act.yml`:
 
 ```YML
 jobs:
@@ -146,19 +146,19 @@ jobs:
     secrets: inherit
 ```
 
-Incidentally, you don't need to worry about the branch name with `act` as it will just run what's in your directory. GitHub, on the other hand, does need a branch reference, so you'll need to change that to test changes to workflows on GitHub. So, change the branch like this:
+It's not strictly necessary that they are relative in `CI_CD_act.yml`, but this ensures you're running your local workflows instead of what's on main in GitHub. Using relative paths when running with `act` is only truly necessary if you've overridden a make target from the shared `Makefile` in your consuming repo's file, otherwise `act` will continue to use the shared version of the make target. For instance, you need to use a relative path to `shared/.github/workflows/CI.yml` if you've overridden `full-test` in your consuming repo's `Makefile`, because that shared workflow calls the `full-test` make target -- e.g., if you've done this in your `Makefile`:
 
-```YML
-jobs:
-  CI:
-    name: QC and Tests
-    uses: crickets-and-comb/shared/.github/workflows/CI.yml@dev/me/my-shared-dev-branch
-    secrets: inherit
+```
+export
+include shared/Makefile
+
+full-test: # Run all the tests. (NOTE: this means running `run-act` requires switching the path to the shared CI workflow to a relative path in CI_CD_act.yml.)
+	$(MAKE) unit
 ```
 
 Further, in order to checkout the right commit of the submodule when testing a workflow on GitHub, you'll need to check a couple of things. First, make sure you have the branch set in your consuming repo's `.gitmodules` file. Second, make sure you've committed, in the consuming repo, the commit hash you're testing of the shared repo submodule.
 
-It's tricky developing shared workflows, but if you're just developing the consuming repo's package itself, you shouldn't need to do any of this. The `full*` make targets in `Makefile` should suffice. They will run on your local machine without Docker and will look in your shared submodule without any special direction.
+It's tricky developing shared workflows, but if you're just developing the consuming repo's package itself, you shouldn't need to even use `run-act`. The `full*` make targets in `Makefile` should suffice. They will run on your local machine without Docker and will look in your shared submodule without any special direction.
 
 ## Matrix build and support window
 
