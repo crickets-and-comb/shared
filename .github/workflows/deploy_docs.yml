@@ -8,6 +8,8 @@ on:
         type: string
         required: true
     secrets:
+      ACTIONS_DEPLOY_KEY:
+        required: true
       CHECKOUT_SHARED:
         required: true
 
@@ -60,5 +62,5 @@ jobs:
       - name: Deploy Documentation
         uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
           publish_dir: ${{ env.DOC_BUILD_DIR }}
