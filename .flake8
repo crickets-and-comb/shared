@@ -1,5 +1,4 @@
 [flake8]
-# TODO: Explore further plugins.
 # Plugins:
 # ANN   : flake8-annotations
 # B,B9  : flake8-bugbear
