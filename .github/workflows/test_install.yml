@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       RELEASE_VERSION:
-        description: 'Which version to release? If empty, will use version checked out in repo.'
+        description: 'Which version to test? If empty, will use version checked out in repo.'
         type: string
         required: false
       TEST_OR_PROD:
