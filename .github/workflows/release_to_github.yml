@@ -36,7 +36,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          token: ${{ secrets.CHECKOUT_SHARED }} # Token with full repo scope. # TODO: Figure out how to not use PAT?
+          token: ${{ secrets.CHECKOUT_SHARED }} # Token with full repo scope.
 
       - name: Set up Python
         uses: actions/setup-python@v5
