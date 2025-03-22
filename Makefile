@@ -99,7 +99,6 @@ set-CI-CD-file: # Override to update the CI-CD file for run-act, e.g. to use loc
 	# e.g.
 	# perl -pi -e 's|crickets-and-comb/shared/.github/workflows/CI\.yml\@main|./shared/.github/workflows/CI.yml|g' .github/workflows/CI_CD_act.yml
 
-# TODO: Fix reusables to take matrix flags?
 run-act: # Run the CI-CD workflow.
 	$(eval MATRIX_OS_FLAG := $(if $(MATRIX_OS),--matrix os:${MATRIX_OS},))
 	$(eval MATRIX_PYTHON_VERSION_FLAG := $(if $(MATRIX_PYTHON_VERSION),--matrix python-version:${MATRIX_PYTHON_VERSION},))
