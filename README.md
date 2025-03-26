@@ -2,6 +2,8 @@
 
 Shared resources and tools, mainly GitHub Actions reusable workflows and Makefile dev tools.
 
+This is a [Crickets and Comb](https://cricketsandcomb.org) resource.
+
 ## Setup
 
 You can use the reusable workflows in `.github/workflows/` like any GitHub Actions reusable workflow (see https://docs.github.com/en/actions/sharing-automations/reusing-workflows). See `reference_package` for examples, https://github.com/crickets-and-comb/reference_package.
