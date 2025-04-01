@@ -52,6 +52,9 @@ jobs:
       # TODO: DELETE THIS AFTER DEBUGGING
       - name: Debug black
         run: |
+          sed -n '24p' /home/runner/work/bfb_delivery/bfb_delivery/src/bfb_delivery/lib/dispatch/api_callers.py | od -c
+          sed -n '25p' /home/runner/work/bfb_delivery/bfb_delivery/src/bfb_delivery/lib/dispatch/api_callers.py | od -c
+          sed -n '26p' /home/runner/work/bfb_delivery/bfb_delivery/src/bfb_delivery/lib/dispatch/api_callers.py | od -c
           cat /home/runner/work/bfb_delivery/bfb_delivery/src/bfb_delivery/lib/dispatch/api_callers.py
           conda run -n ${{ env.DEV_ENV_NAME }} black --config /home/runner/work/bfb_delivery/bfb_delivery/shared/pyproject.toml --diff --color /home/runner/work/bfb_delivery/bfb_delivery/src
           conda run -n ${{ env.DEV_ENV_NAME }} black --config /home/runner/work/bfb_delivery/bfb_delivery/shared/pyproject.toml /home/runner/work/bfb_delivery/bfb_delivery/src
