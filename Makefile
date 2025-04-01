@@ -57,7 +57,7 @@ format: # Clean up code.
 	isort -p ${PACKAGE_NAME} --settings-path ${REPO_ROOT}shared/pyproject.toml ${QC_DIRS}
 
 lint: # Check style and formatting. Should agree with format and only catch what format can't fix, like line length, missing docstrings, etc.
-	black --config ${REPO_ROOT}shared/pyproject.toml --verbose --check ${QC_DIRS}
+	python -u -m black --config ${REPO_ROOT}shared/pyproject.toml --verbose --check ${QC_DIRS}
 	isort -p ${PACKAGE_NAME} --settings-path ${REPO_ROOT}shared/pyproject.toml --check-only ${QC_DIRS}
 	flake8 --config ${REPO_ROOT}shared/.flake8 ${QC_DIRS}
 
