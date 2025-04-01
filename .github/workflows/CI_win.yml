@@ -52,7 +52,6 @@ jobs:
       # TODO: DELETE THIS AFTER DEBUGGING
       - name: Debug black
         run: |
-          conda run -n ${{ env.DEV_ENV_NAME }} black --config /home/runner/work/bfb_delivery/bfb_delivery/shared/pyproject.toml /home/runner/work/bfb_delivery/bfb_delivery/src
           conda run -n ${{ env.DEV_ENV_NAME }} black --config /home/runner/work/bfb_delivery/bfb_delivery/shared/pyproject.toml --diff --color --verbose /home/runner/work/bfb_delivery/bfb_delivery/src
           conda run -n ${{ env.DEV_ENV_NAME }} black --config /home/runner/work/bfb_delivery/bfb_delivery/shared/pyproject.toml --check /home/runner/work/bfb_delivery/bfb_delivery/src
 
