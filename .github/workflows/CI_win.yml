@@ -49,6 +49,13 @@ jobs:
           make build-env CONDA_ENV_NAME=${DEV_ENV_NAME} PYTHON_VERSION=${{ matrix.python-version }}
           conda run -n ${DEV_ENV_NAME} make install
 
+      # TODO: DELETE THIS AFTER DEBUGGING
+      - name: Debug black
+        run: |
+          conda run -n ${{ env.DEV_ENV_NAME }} black --config /home/runner/work/bfb_delivery/bfb_delivery/shared/pyproject.toml /home/runner/work/bfb_delivery/bfb_delivery/src
+          conda run -n ${{ env.DEV_ENV_NAME }} black --diff --color --verbose /home/runner/work/bfb_delivery/bfb_delivery/src
+          conda run -n ${{ env.DEV_ENV_NAME }} black --config /home/runner/work/bfb_delivery/bfb_delivery/shared/pyproject.toml --check /home/runner/work/bfb_delivery/bfb_delivery/src
+
       # TODO: Skip 3.13 QC until msgspec releases compatible update. (pytype uses msgspec, but it doesn't work on 3.13 yet.)
       # https://github.com/crickets-and-comb/shared/issues/49
       - name: Run QC
