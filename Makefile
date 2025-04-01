@@ -53,11 +53,11 @@ clean: # Clear caches and coverage reports, etc.
 	$(shell find ${REPO_ROOT} -type f -name '*py[co]' -delete -o -type d -name __pycache__ -delete)
 
 format: # Clean up code.
-	black --config ${REPO_ROOT}shared/pyproject.toml --verbose ${QC_DIRS}
+	black --config ${REPO_ROOT}shared/pyproject.toml ${QC_DIRS}
 	isort -p ${PACKAGE_NAME} --settings-path ${REPO_ROOT}shared/pyproject.toml ${QC_DIRS}
 
 lint: # Check style and formatting. Should agree with format and only catch what format can't fix, like line length, missing docstrings, etc.
-	conda run -n ${CONDA_ENV_NAME} python -u -m black --config ${REPO_ROOT}shared/pyproject.toml --verbose --check ${QC_DIRS}
+	black --config ${REPO_ROOT}shared/pyproject.toml --check ${QC_DIRS}
 	isort -p ${PACKAGE_NAME} --settings-path ${REPO_ROOT}shared/pyproject.toml --check-only ${QC_DIRS}
 	flake8 --config ${REPO_ROOT}shared/.flake8 ${QC_DIRS}
 
