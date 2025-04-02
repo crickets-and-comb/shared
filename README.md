@@ -1,5 +1,7 @@
 # shared
 
+CURRENTLY using main to debug consuming repo, so not a stable API at the moment -- not expecting anyone to use this anytime soon, so willing to break the "contract" for the moment at this early stage of public release.
+
 Shared resources and tools, mainly GitHub Actions reusable workflows and Makefile dev tools.
 
 This is a [Crickets and Comb](https://cricketsandcomb.org) resource.
