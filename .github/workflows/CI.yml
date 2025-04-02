@@ -32,6 +32,8 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
           submodules: recursive
           token: ${{ secrets.CHECKOUT_SHARED }} # Token with full repo scope.
         

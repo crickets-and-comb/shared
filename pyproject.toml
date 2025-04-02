@@ -1,6 +1,5 @@
 [tool.black]
 line_length = 94
-preview = true
 
 [tool.isort]
 line_length = 94
