@@ -34,6 +34,7 @@ jobs:
         with:
           submodules: recursive
           token: ${{ secrets.CHECKOUT_SHARED }} # Token with full repo scope.
+          fetch-depth: 0
         
       - name: Setup Conda
         uses: conda-incubator/setup-miniconda@v3
