@@ -52,6 +52,7 @@ jobs:
       # TODO: DELETE THIS AFTER DEBUGGING
       - name: Debug black
         run: |
+          git log -1 --stat
           sed -n '24p' /home/runner/work/bfb_delivery/bfb_delivery/src/bfb_delivery/lib/dispatch/api_callers.py | od -c
           sed -n '25p' /home/runner/work/bfb_delivery/bfb_delivery/src/bfb_delivery/lib/dispatch/api_callers.py | od -c
           sed -n '26p' /home/runner/work/bfb_delivery/bfb_delivery/src/bfb_delivery/lib/dispatch/api_callers.py | od -c
