@@ -6,7 +6,8 @@ on:
       ALLOWED_ORG:
         description: 'GitHub organization name that is allowed to open PRs.'
         type: string
-        required: true
+        required: false
+        default: ""
       ALLOWED_USERS:
         description: 'Comma-separated list of GitHub users who are allowed to open PRs even if they are not in the organization.'
         type: string
@@ -30,7 +31,8 @@ jobs:
         run: |
           set -e
 
-          echo "should_close=true" >> $GITHUB_OUTPUT # For good measure.
+          should_close=true
+          echo "should_close=$should_close" >> $GITHUB_OUTPUT # For good measure.
 
           prAuthor=$(jq -r '.pull_request.user.login' < "$GITHUB_EVENT_PATH")
           allowedOrg=${{ inputs.ALLOWED_ORG }}
@@ -40,29 +42,33 @@ jobs:
           for user in "${ALLOWED_USERS[@]}"; do
             if [[ "$prAuthor" == "$user" ]]; then
               echo "User $prAuthor is explicitly allowed. PR remains open."
-              echo "should_close=false" >> $GITHUB_OUTPUT
+              should_close=false
             fi
           done
 
-          {
-            echo "Checking if user $prAuthor is a member of $allowedOrg..."
-            response=$(curl -s -S -H "Authorization: Bearer ${{ secrets.ORG_READ_TOKEN }}" \
-                              -H "Accept: application/vnd.github.v3+json" \
-                              https://api.github.com/orgs/$allowedOrg/memberships/$prAuthor)
+          if [[ $should_close == 'true' && -n "$allowedOrg" ]]; then
+            {
+              echo "Checking if user $prAuthor is a member of $allowedOrg..."
+              response=$(curl -s -S -H "Authorization: Bearer ${{ secrets.ORG_READ_TOKEN }}" \
+                                -H "Accept: application/vnd.github.v3+json" \
+                                https://api.github.com/orgs/$allowedOrg/memberships/$prAuthor)
 
-            state=$(echo "$response" | jq -r '.state // empty')
-            if [[ "$state" == "active" ]]; then
-              echo "User $prAuthor is a member of $allowedOrg. PR remains open."
-              echo "should_close=false" >> $GITHUB_OUTPUT
-            else
-              echo "User $prAuthor is not a member of $allowedOrg. Closing PR."
-              echo "Response: $response"
-              echo "should_close=true" >> $GITHUB_OUTPUT
-            fi
-          } || {
-            echo "An error occurred during membership validation. Closing PR as a precaution."
-            echo "should_close=true" >> $GITHUB_OUTPUT
-          }
+              state=$(echo "$response" | jq -r '.state // empty')
+              if [[ "$state" == "active" ]]; then
+                echo "User $prAuthor is a member of $allowedOrg. PR remains open."
+                should_close=false
+              else
+                echo "User $prAuthor is not a member of $allowedOrg. Closing PR."
+                echo "Response: $response"
+                should_close=true
+              fi
+            } || {
+              echo "An error occurred during membership validation. Closing PR as a precaution."
+              should_close=true
+            }
+          fi
+          echo "Final decision: should_close=$should_close"
+          echo "should_close=$should_close" >> $GITHUB_OUTPUT
 
   close-pr:
     needs: close-external-prs
