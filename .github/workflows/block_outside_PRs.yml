@@ -32,7 +32,7 @@ jobs:
           set -e
 
           should_close=true
-          echo "should_close=$should_close" >> $GITHUB_OUTPUT # For good measure.
+          echo "should_close=$should_close" >> $GITHUB_OUTPUT
 
           prAuthor=$(jq -r '.pull_request.user.login' < "$GITHUB_EVENT_PATH")
           allowedOrg=${{ inputs.ALLOWED_ORG }}
