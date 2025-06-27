@@ -16,8 +16,10 @@ See https://git-scm.com/book/en/v2/Git-Tools-Submodules
 
 If this shared repo hasn't yet been added to a repo where you want to start using it, create this as a Git submodule in that repo by running and committing:
 
+```bash
   $ git submodule add git@github.com:crickets-and-comb/shared.git
   $ git commit -m "Add shared submod."
+```
 
 See https://git-scm.com/book/en/v2/Git-Tools-Submodules
 
@@ -25,8 +27,10 @@ See https://git-scm.com/book/en/v2/Git-Tools-Submodules
 
 Once you've done that, or if this shared repo has already been added to a repo you're using but you're using a fresh clone of that repo, initialize this Git submodule:
 
+```bash
   $ git submodule init
   $ git submodule update
+```
 
 See https://git-scm.com/book/en/v2/Git-Tools-Submodules
 
@@ -52,13 +56,17 @@ You can use this repo as a submodule to another repo in order to make use of the
 
 See the setup section above, but once you've set up this submodule in your consuming repo, you'll want to periodically update it to get updates to the shared tools:
 
+```bash
   $ git submodule update --remote --merge
+```
 
 This will update all Git submodules. To be more specific to shared, and perhaps more easy to remember, simple navigate into the shared subdirectory and pull:
 
+```bash
   $ cd shared
   $ git checkout main
   $ git pull
+```
 
 Either way will pull the latest commit on the submodule's remote. Note that, while you'll be able to run with this updated shared submodule, you'll still want to commit that update to your consuming repo to track that update. After updating, you'll see an unstaged change in the submodule's commit hash that the consuming repo tracks:
 
@@ -120,13 +128,17 @@ When developing the workflows themselves, you'll want to try them out locally be
 
 You can use a make target for that:
 
+```bash
   $ make run-act
+```
 
 That will run `.github/workflows/CI_CD.yml`. But, you can also run any workflow you'd like by using `act` directly. See https://nektosact.com.
 
 To use this tool, you'll need to have Docker installed and running on your machine: https://www.docker.com/. You'll also need to install `act` in your terminal:
 
+```bash
   $ brew install act
+```
 
 NOTE: To be more accurate `run-act` copies `CI_CD.yml` to `CI_CD_act.yml` and runs it. It does this so you can optionally override `set-CI-CD-file` to update the CI-CD file run by `act`. This is useful if you've overriden another shared make target (e.g., `full-test`), because `act` will not honor *that* override and will use the shared version of it if you use the GitHub URL to call a shared workflow that uses the target. You'll need to use the relative path to call the workflow.
 
