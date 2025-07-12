@@ -32,8 +32,10 @@ jobs:
 
     steps:
       - name: Debug Ref Info
+        env:
+          REF: ${{ inputs.REF_TO_CHECKOUT }}
         run: |
-          echo "Checking out ref: ${{ inputs.REF_TO_CHECKOUT }}"
+          echo "Checking out ref: $REF"
 
       - name: Set Default Branch
         run: |
