@@ -41,11 +41,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Debug Ref Info
+      - name: Validate and set REF_TO_CHECKOUT
+        id: validate-ref
         env:
-          REF: ${{ inputs.REF_TO_CHECKOUT }}
+          REF_TO_CHECKOUT: ${{ inputs.REF_TO_CHECKOUT }}
         run: |
-          echo "Checking out ref: $REF"
+          if [[ ! "$REF_TO_CHECKOUT" =~ ^refs/(heads|pull|tags)/[A-Za-z0-9._/-]+$ ]]; then
+            echo "Invalid ref: $REF_TO_CHECKOUT"
+            exit 1
+          fi
+
+          echo "Checking out ref: $REF_TO_CHECKOUT"
+          echo "$REF_TO_CHECKOUT=$REF_TO_CHECKOUT" >> $GITHUB_OUTPUT
 
       - name: Set Default Branch
         run: |
@@ -54,7 +61,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.REF_TO_CHECKOUT }}
+          ref: ${{ steps.validate-ref.outputs.REF_TO_CHECKOUT }}
           submodules: recursive
           token: ${{ secrets.CHECKOUT_SHARED }}
 
