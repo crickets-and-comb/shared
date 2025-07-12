@@ -118,7 +118,7 @@ Some shared reusable workflows are meant to be called from workflows triggered b
 
 To address this, these reusable workflows (e.g. `.github/workflows/CI.yml`) offer an optional input called `REF_TO_CHECKOUT`. You can set this input to be the PR merge ref so it runs within the base repo instead of the forked repo. See the `reference_package` `.github/workflows/PR_CI_CD.yml` for an example of how to do this.
 
-`REF_TO_CHECKOUT` is option in case you want to run the workflow on a trigger that does not use inputs, like the `schedule` trigger.
+`REF_TO_CHECKOUT` is optional in case you want to run the workflow on a trigger that does not use inputs, like the `schedule` trigger.
 
 #### Publishing to PyPi
 
