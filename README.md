@@ -112,6 +112,14 @@ See also the `reference_package` `.github/workflows/test_install_dispatch.yml` w
 
 While wrapping a single workflow for manual dispatch can be handy, you'll also want to wrap these shared workflows into a single workflow calling them in the desired order (QC/test, build, publish, test installation, deploy docs). See the `reference_package` `.github/workflows/CI_CD.yml` workflow for an example: https://github.com/crickets-and-comb/reference_package
 
+#### ATTENTION: setting `REF_TO_CHECKOUT`
+
+Some shared reusable workflows are meant to be called from workflows triggered by pull requests. A pull request from a forked repo then poses a security risk because it will run the head of the forked repo branch, which can trigger malicious actions.
+
+To address this, these reusable workflows (e.g. `.github/workflows/CI.yml`) offer an optional input called `REF_TO_CHECKOUT`. You can set this input to be the PR merge ref so it runs within the base repo instead of the forked repo. See the `reference_package` `.github/workflows/PR_CI_CD.yml` for an example of how to do this.
+
+`REF_TO_CHECKOUT` is option in case you want to run the workflow on a trigger that does not use inputs, like the `schedule` trigger.
+
 #### Publishing to PyPi
 
 Shared workflows are split into different aspects of CI/CD, but they don't cover all of them. Specifically, they don't cover publishing packages to PyPi. This is because PyPi doesn't allow trusted publishing from reusable workflows. See the `reference_package` `.github/workflows/CI_CD.yml` workflow for an example: https://github.com/crickets-and-comb/reference_package. Here we've defined publishing jobs within the same workflow that calls shared workflows to create a full CI/CD pipeline.
