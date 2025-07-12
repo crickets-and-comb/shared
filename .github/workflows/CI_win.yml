@@ -2,6 +2,12 @@ name: Makefile CI
 
 on:
   workflow_call:
+    inputs:
+      REF_TO_CHECKOUT:
+        description: "The git ref to checkout."
+        required: false
+        default: "refs/heads/main"
+        type: string
     secrets:
       CHECKOUT_SHARED:
         required: true
@@ -25,6 +31,10 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Debug Ref Info
+        run: |
+          echo "Checking out ref: ${{ inputs.REF_TO_CHECKOUT }}"
+
       - name: Set Default Branch
         run: |
           git config --global init.defaultBranch main
@@ -32,10 +42,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
-          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ inputs.REF_TO_CHECKOUT }}
           submodules: recursive
           token: ${{ secrets.CHECKOUT_SHARED }} # Token with full repo scope.
+          # TODO: Remove fetch-depth.
           fetch-depth: 0
         
       - name: Setup Conda
