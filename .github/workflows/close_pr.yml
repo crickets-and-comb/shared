@@ -17,19 +17,76 @@ on:
         required: true
 
 jobs:
+  validate-inputs:
+    runs-on: ubuntu-latest
+    outputs:
+      PR_NUMBER: ${{ steps.validate-pr.outputs.PR_NUMBER }}
+      PR_AUTHOR: ${{ steps.validate-author.outputs.PR_AUTHOR }}
+      REASON: ${{ steps.validate-reason.outputs.REASON }}
+
+    steps:
+      - name: Validate PR Number
+        id: validate-pr
+        env:
+          PR_NUMBER: ${{ inputs.PR_NUMBER }}
+        run: |
+          if [[ -z "$PR_NUMBER" ]]; then
+            echo "PR_NUMBER is required."
+            exit 1
+          fi
+          if ! [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]; then
+            echo "Invalid PR_NUMBER: $PR_NUMBER"
+            exit 1
+          fi
+          echo "Using PR_NUMBER: $PR_NUMBER"
+          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_OUTPUT
+
+      - name: Validate PR Author
+        id: validate-author
+        env:
+          PR_AUTHOR: ${{ inputs.PR_AUTHOR }}
+        run: |
+          if [[ -z "$PR_AUTHOR" ]]; then
+            echo "PR_AUTHOR is required."
+            exit 1
+          fi
+          if ! [[ "$PR_AUTHOR" =~ ^[A-Za-z0-9_-]+$ ]]; then
+            echo "Invalid PR_AUTHOR: $PR_AUTHOR"
+            exit 1
+          fi
+          echo "Using PR_AUTHOR: $PR_AUTHOR"
+          echo "PR_AUTHOR=$PR_AUTHOR" >> $GITHUB_OUTPUT
+
+      - name: Validate Reason
+        id: validate-reason
+        env:
+          REASON: ${{ inputs.REASON }}
+        run: |
+          if [[ -z "$REASON" ]]; then
+            echo "REASON is required."
+            exit 1
+          fi
+          if ! [[ "$REASON" =~ ^[A-Za-z0-9_ -]+$ ]]; then
+            echo "Invalid REASON: $REASON"
+            exit 1
+          fi
+          echo "Using REASON: $REASON"
+          echo "REASON=$REASON" >> $GITHUB_OUTPUT
+
   close-pr:
+    needs: validate-inputs
     runs-on: ubuntu-latest
     steps:
       - name: Close Pull Request
         run: |
-          echo "Closing PR #${{ inputs.PR_NUMBER }}: ${{ inputs.REASON }}"
+          echo "Closing PR #${{ needs.validate-inputs.outputs.PR_NUMBER }}: ${{ needs.validate-inputs.outputs.REASON }}"
 
           curl -s -S -X PATCH -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
                -H "Accept: application/vnd.github.v3+json" \
                -d '{"state": "closed"}' \
-               https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/${{ inputs.PR_NUMBER }} || true
+               https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/${{ needs.validate-inputs.outputs.PR_NUMBER }} || true
 
           curl -s -S -X POST -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
                -H "Accept: application/vnd.github.v3+json" \
-               -d "{\"body\": \"**Pull request closed**\n\nHi @${{ inputs.PR_AUTHOR }}, this PR was closed automatically. Reason: ${{ inputs.REASON }}\"}" \
-               https://api.github.com/repos/$GITHUB_REPOSITORY/issues/${{ inputs.PR_NUMBER }}/comments || true
+               -d "{\"body\": \"**Pull request closed**\n\nHi @${{ needs.validate-inputs.outputs.PR_AUTHOR }}, this PR was closed automatically. Reason: ${{ steps.validate-reason.outputs.REASON }}\"}" \
+               https://api.github.com/repos/$GITHUB_REPOSITORY/issues/${{ needs.validate-inputs.outputs.PR_NUMBER }}/comments || true
