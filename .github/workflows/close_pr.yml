@@ -88,5 +88,5 @@ jobs:
 
           curl -s -S -X POST -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
                -H "Accept: application/vnd.github.v3+json" \
-               -d "{\"body\": \"**Pull request closed**\n\nHi @${{ needs.validate-inputs.outputs.PR_AUTHOR }}, this PR was closed automatically. Reason: ${{ steps.validate-reason.outputs.REASON }}\"}" \
+               -d "{\"body\": \"**Pull request closed**\n\nHi @${{ needs.validate-inputs.outputs.PR_AUTHOR }}, this PR was closed automatically. Reason: ${{ needs.validate-inputs.outputs.REASON }}\"}" \
                https://api.github.com/repos/$GITHUB_REPOSITORY/issues/${{ needs.validate-inputs.outputs.PR_NUMBER }}/comments || true
