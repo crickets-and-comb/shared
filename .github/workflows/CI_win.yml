@@ -42,7 +42,7 @@ jobs:
           fi
 
           echo "Checking out ref: $REF_TO_CHECKOUT"
-          echo "$REF_TO_CHECKOUT=$REF_TO_CHECKOUT" >> $GITHUB_OUTPUT
+          echo "REF_TO_CHECKOUT=$REF_TO_CHECKOUT" >> $GITHUB_OUTPUT
 
       - name: Set Default Branch
         run: |
