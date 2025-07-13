@@ -2,6 +2,12 @@ name: Makefile CI
 
 on:
   workflow_call:
+    inputs:
+      REF_TO_CHECKOUT:
+        description: "The git ref to checkout."
+        required: false
+        default: "refs/heads/main"
+        type: string
     secrets:
       CHECKOUT_SHARED:
         required: true
@@ -25,6 +31,19 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Validate and set REF_TO_CHECKOUT
+        id: validate-ref
+        env:
+          REF_TO_CHECKOUT: ${{ inputs.REF_TO_CHECKOUT }}
+        run: |
+          if [[ ! "$REF_TO_CHECKOUT" =~ ^refs/(heads|pull|tags)/[A-Za-z0-9._/-]+$ ]]; then
+            echo "Invalid ref: $REF_TO_CHECKOUT"
+            exit 1
+          fi
+
+          echo "Checking out ref: $REF_TO_CHECKOUT"
+          echo "REF_TO_CHECKOUT=$REF_TO_CHECKOUT" >> $GITHUB_OUTPUT
+
       - name: Set Default Branch
         run: |
           git config --global init.defaultBranch main
@@ -32,11 +51,9 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
-          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ steps.validate-ref.outputs.REF_TO_CHECKOUT }}
           submodules: recursive
           token: ${{ secrets.CHECKOUT_SHARED }} # Token with full repo scope.
-          fetch-depth: 0
         
       - name: Setup Conda
         uses: conda-incubator/setup-miniconda@v3

@@ -9,7 +9,27 @@ on:
         required: false
 
 jobs:
+  validate-inputs:
+    runs-on: ubuntu-latest
+    outputs:
+      ALLOWED_USERS: ${{ steps.validate-users.outputs.ALLOWED_USERS }}
+
+    steps:
+      - name: Validate and set ALLOWED_USERS
+        id: validate-users
+        env:
+          ALLOWED_USERS: ${{ inputs.ALLOWED_USERS }}
+        run: |
+          if [[ -z "$ALLOWED_USERS" ]]; then
+            echo "No specific users allowed. All users will be checked against the organization."
+            echo "ALLOWED_USERS=" >> $GITHUB_OUTPUT
+          else
+            echo "Using allowed users: $ALLOWED_USERS"
+            echo "ALLOWED_USERS=$ALLOWED_USERS" >> $GITHUB_OUTPUT
+          fi  
+
   block:
+    needs: validate-inputs
     runs-on: ubuntu-latest
     outputs:
       should_close: ${{ steps.check-user.outputs.should_close }}
@@ -17,7 +37,7 @@ jobs:
       - name: Check if GITHUB_ACTOR is allowed
         id: check-user
         run: |
-          ALLOWED_USERS_LIST="${{ inputs.ALLOWED_USERS }}"
+          ALLOWED_USERS_LIST="${{ needs.validate-inputs.outputs.ALLOWED_USERS }}"
           IFS=',' read -ra ALLOWED_USERS <<< "$ALLOWED_USERS_LIST"
 
           echo "should_close=true" >> $GITHUB_OUTPUT

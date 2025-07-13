@@ -15,6 +15,11 @@ on:
         description: 'Name of the dist artifact to upload. Acts like a key.'
         type: string
         required: true
+      REF_TO_CHECKOUT:
+        description: "The git ref to checkout."
+        required: false
+        default: "refs/heads/main"
+        type: string
       UPLOAD_DIST:
         description: 'If passed `true`, upload dist artifact. Allows a test build locally without uploading.'
         type: boolean
@@ -31,7 +36,71 @@ env:
   CONDA_VERSION: latest
 
 jobs:
+  validate-inputs:
+    name: Validate Inputs
+    runs-on: ubuntu-latest
+    outputs:
+      DIST_DIR: ${{ steps.validate-dist-dir.outputs.DIST_DIR }}
+      PYTHON_BUILD_VERSION: ${{ steps.validate-python-version.outputs.PYTHON_BUILD_VERSION }}
+      PYTHON_PACKAGE_DIST_NAME: ${{ steps.validate-package-name.outputs.PYTHON_PACKAGE_DIST_NAME }}
+      REF_TO_CHECKOUT: ${{ steps.validate-ref.outputs.REF_TO_CHECKOUT }}
+
+    steps:
+      - name: Validate and set DIST_DIR
+        id: validate-dist-dir
+        env:
+          DIST_DIR: ${{ inputs.DIST_DIR }}
+        run: |
+          if [[ -z "$DIST_DIR" ]]; then
+            echo "DIST_DIR is required."
+            exit 1
+          fi
+
+          echo "Using DIST_DIR: $DIST_DIR"
+          echo "DIST_DIR=$DIST_DIR" >> $GITHUB_OUTPUT
+
+      - name: Validate and set PYTHON_BUILD_VERSION
+        id: validate-python-version
+        env:
+          PYTHON_BUILD_VERSION: ${{ inputs.PYTHON_BUILD_VERSION }}
+        run: |
+          if [[ -z "$PYTHON_BUILD_VERSION" ]]; then
+            echo "PYTHON_BUILD_VERSION is required."
+            exit 1
+          fi
+          if [[ ! "$PYTHON_BUILD_VERSION" =~ ^[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid PYTHON_BUILD_VERSION: $PYTHON_BUILD_VERSION"
+            exit 1
+          fi
+          echo "Using PYTHON_BUILD_VERSION: $PYTHON_BUILD_VERSION"
+          echo "PYTHON_BUILD_VERSION=$PYTHON_BUILD_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Validate and set PYTHON_PACKAGE_DIST_NAME
+        id: validate-package-name
+        env:
+          PYTHON_PACKAGE_DIST_NAME: ${{ inputs.PYTHON_PACKAGE_DIST_NAME }}
+        run: |
+          if [[ -z "$PYTHON_PACKAGE_DIST_NAME" ]]; then
+            echo "PYTHON_PACKAGE_DIST_NAME is required."
+            exit 1
+          fi
+          echo "Using PYTHON_PACKAGE_DIST_NAME: $PYTHON_PACKAGE_DIST_NAME"
+          echo "PYTHON_PACKAGE_DIST_NAME=$PYTHON_PACKAGE_DIST_NAME" >> $GITHUB_OUTPUT
+
+      - name: Validate and set REF_TO_CHECKOUT
+        id: validate-ref
+        env:
+          REF_TO_CHECKOUT: ${{ inputs.REF_TO_CHECKOUT }}
+        run: |
+          if [[ ! "$REF_TO_CHECKOUT" =~ ^refs/(heads|pull|tags)/[A-Za-z0-9._/-]+$ ]]; then
+            echo "Invalid ref: $REF_TO_CHECKOUT"
+            exit 1
+          fi
+          echo "Checking out ref: $REF_TO_CHECKOUT"
+          echo "REF_TO_CHECKOUT=$REF_TO_CHECKOUT" >> $GITHUB_OUTPUT
+
   build-dist:
+    needs: validate-inputs
     name: Build Dist
     runs-on: ubuntu-latest
 
@@ -43,8 +112,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
-          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ needs.validate-inputs.outputs.REF_TO_CHECKOUT }}
           submodules: recursive
           token: ${{ secrets.CHECKOUT_SHARED }}
 
@@ -53,24 +121,24 @@ jobs:
         with:
           auto-activate-base: false
           miniconda-version: ${{ env.CONDA_VERSION }}
-          python-version: ${{ inputs.PYTHON_BUILD_VERSION}}
+          python-version: ${{ needs.validate-inputs.outputs.PYTHON_BUILD_VERSION }}
 
       - name: Build Environment.
         run: |
-          CONDA_ENV_NAME=build_dist_py${{ inputs.PYTHON_BUILD_VERSION}}
+          CONDA_ENV_NAME=build_dist_py${{ needs.validate-inputs.outputs.PYTHON_BUILD_VERSION }}
           echo "CONDA_ENV_NAME=${CONDA_ENV_NAME}" >> $GITHUB_ENV
 
-          make build-env CONDA_ENV_NAME=${CONDA_ENV_NAME} PYTHON_VERSION=${{ inputs.PYTHON_BUILD_VERSION}}
+          make build-env CONDA_ENV_NAME=${CONDA_ENV_NAME} PYTHON_VERSION=${{ needs.validate-inputs.outputs.PYTHON_BUILD_VERSION }}
           conda run -n ${CONDA_ENV_NAME} make install INSTALL_EXTRAS=[build]
 
       - name: Build Package
         run: |
-          conda run -n ${{ env.CONDA_ENV_NAME }} make build-package DIST_DIR=${{ inputs.DIST_DIR }}
+          conda run -n ${{ env.CONDA_ENV_NAME }} make build-package DIST_DIR=${{ needs.validate-inputs.outputs.DIST_DIR }}
 
       - name: Upload Package
         if: ${{ inputs.UPLOAD_DIST }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.PYTHON_PACKAGE_DIST_NAME }}
-          path: ${{ inputs.DIST_DIR }}
+          name: ${{ needs.validate-inputs.outputs.PYTHON_PACKAGE_DIST_NAME }}
+          path: ${{ needs.validate-inputs.outputs.DIST_DIR }}
           overwrite: true

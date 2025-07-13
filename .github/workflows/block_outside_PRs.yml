@@ -21,7 +21,41 @@ defaults:
     shell: bash -el {0}
 
 jobs:
+  validate-inputs:
+    runs-on: ubuntu-latest
+    outputs:
+      ALLOWED_ORG: ${{ steps.validate-org.outputs.ALLOWED_ORG }}
+      ALLOWED_USERS: ${{ steps.validate-users.outputs.ALLOWED_USERS }}
+
+    steps:
+      - name: Validate and set ALLOWED_ORG
+        id: validate-org
+        env:
+          ALLOWED_ORG: ${{ inputs.ALLOWED_ORG }}
+        run: |
+          if [[ -z "$ALLOWED_ORG" ]]; then
+            echo "No organization specified. Skipping PR closure check."
+            echo "ALLOWED_ORG=" >> $GITHUB_OUTPUT
+          else
+            echo "Using allowed organization: $ALLOWED_ORG"
+            echo "ALLOWED_ORG=$ALLOWED_ORG" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Validate and set ALLOWED_USERS
+        id: validate-users
+        env:
+          ALLOWED_USERS: ${{ inputs.ALLOWED_USERS }}
+        run: |
+          if [[ -z "$ALLOWED_USERS" ]]; then
+            echo "No specific users allowed. All users will be checked against the organization."
+            echo "ALLOWED_USERS=" >> $GITHUB_OUTPUT
+          else
+            echo "Using allowed users: $ALLOWED_USERS"
+            echo "ALLOWED_USERS=$ALLOWED_USERS" >> $GITHUB_OUTPUT
+          fi
+
   close-external-prs:
+    needs: validate-inputs
     runs-on: ubuntu-latest
     outputs:
       should_close: ${{ steps.check-permission.outputs.should_close }}
@@ -35,10 +69,10 @@ jobs:
           echo "should_close=$should_close" >> $GITHUB_OUTPUT
 
           prAuthor=$(jq -r '.pull_request.user.login' < "$GITHUB_EVENT_PATH")
-          allowedOrg=${{ inputs.ALLOWED_ORG }}
+          allowedOrg=${{ needs.validate-inputs.outputs.ALLOWED_ORG }}
           prNumber=$(jq -r '.pull_request.number' < "$GITHUB_EVENT_PATH")
 
-          IFS=',' read -ra ALLOWED_USERS <<< "${{ inputs.ALLOWED_USERS }}"
+          IFS=',' read -ra ALLOWED_USERS <<< "${{ needs.validate-inputs.outputs.ALLOWED_USERS }}"
           for user in "${ALLOWED_USERS[@]}"; do
             if [[ "$prAuthor" == "$user" ]]; then
               echo "User $prAuthor is explicitly allowed. PR remains open."
@@ -71,10 +105,10 @@ jobs:
           echo "should_close=$should_close" >> $GITHUB_OUTPUT
 
   close-pr:
-    needs: close-external-prs
+    needs: [close-external-prs, validate-inputs]
     if: needs.close-external-prs.outputs.should_close == 'true'
     uses: crickets-and-comb/shared/.github/workflows/close_pr.yml@main
     with:
       PR_NUMBER: ${{ github.event.pull_request.number }}
       PR_AUTHOR: ${{ github.actor }}
-      REASON: "Only members of ${{ inputs.ALLOWED_ORG }} or explicitly allowed users can open pull requests. Please file an issue for discussion if needed."
+      REASON: "Only members of ${{ needs.validate-inputs.outputs.ALLOWED_ORG }} or explicitly allowed users can open pull requests. Please file an issue for discussion if needed."
