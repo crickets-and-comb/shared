@@ -10,7 +10,7 @@ SAFETY_KEY_FLAG = $(if $(SAFETY_API_KEY),--key $(SAFETY_API_KEY),)
 CHECKOUT_SHARED ?= $(shell grep CHECKOUT_SHARED .env | cut -d '=' -f2)
 ORG_READ_TOKEN ?= $(shell grep ORG_READ_TOKEN .env | cut -d '=' -f2)
 _GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
-REF_TO_CHECKOUT ?= "refs/heads/$(_GIT_BRANCH)"
+REF_TO_CHECKOUT ?= refs/heads/$(_GIT_BRANCH)
 
 DOC_BUILD_DIR ?= docs/_build/
 DIST_DIR ?= dist/
