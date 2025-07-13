@@ -37,7 +37,7 @@ jobs:
             echo "No organization specified. Skipping PR closure check."
             echo "ALLOWED_ORG=" >> $GITHUB_OUTPUT
           else
-            echo "Using allowed organization: $AllOWED_ORG"
+            echo "Using allowed organization: $ALLOWED_ORG"
             echo "ALLOWED_ORG=$ALLOWED_ORG" >> $GITHUB_OUTPUT
           fi
 
