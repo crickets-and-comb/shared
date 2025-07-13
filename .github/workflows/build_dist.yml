@@ -133,7 +133,7 @@ jobs:
 
       - name: Build Package
         run: |
-          conda run -n ${{ env.CONDA_ENV_NAME }} make build-package DIST_DIR=${{ needs.validate-inputs.outputs.DIST_DIR }} PYTHON_PACKAGE_DIST_NAME=${{ needs.validate-inputs.outputs.PYTHON_PACKAGE_DIST_NAME }}
+          conda run -n ${{ env.CONDA_ENV_NAME }} make build-package DIST_DIR=${{ needs.validate-inputs.outputs.DIST_DIR }}
 
       - name: Upload Package
         if: ${{ inputs.UPLOAD_DIST }}
