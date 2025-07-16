@@ -101,11 +101,13 @@ jobs:
         run: |
           if [[ -z "${{ needs.sanitize-inputs.outputs.RELEASE_VERSION }}" ]]; then
             echo "RELEASE_VERSION is not set, using version from setup.cfg."
-            echo "RELEASE_VERSION=$(python -c 'import configparser; cfg = configparser.ConfigParser(); cfg.read(\"setup.cfg\"); print(cfg[\"metadata\"][\"version\"])')" >> $GITHUB_OUTPUT
+            RELEASE_VERSION=$(python -c 'import configparser; cfg = configparser.ConfigParser(); cfg.read('setup.cfg'); print(cfg['metadata']['version'])')
           else
             echo "Using RELEASE_VERSION: ${{ needs.sanitize-inputs.outputs.RELEASE_VERSION }}"
-            echo "RELEASE_VERSION=${{ needs.sanitize-inputs.outputs.RELEASE_VERSION }}" >> $GITHUB_OUTPUT
+            RELEASE_VERSION=${{ needs.sanitize-inputs.outputs.RELEASE_VERSION }}
           fi
+
+          echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_OUTPUT
 
       - name: Install Package
         run: |
