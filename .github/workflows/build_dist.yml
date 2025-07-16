@@ -15,11 +15,6 @@ on:
         description: 'Name of the dist artifact to upload. Acts like a key.'
         type: string
         required: true
-      REF_TO_CHECKOUT:
-        description: "The git ref to checkout."
-        required: false
-        default: "refs/heads/main"
-        type: string
       UPLOAD_DIST:
         description: 'If passed `true`, upload dist artifact. Allows a test build locally without uploading.'
         type: boolean
@@ -43,7 +38,6 @@ jobs:
       DIST_DIR: ${{ steps.validate-dist-dir.outputs.DIST_DIR }}
       PYTHON_BUILD_VERSION: ${{ steps.validate-python-version.outputs.PYTHON_BUILD_VERSION }}
       PYTHON_PACKAGE_DIST_NAME: ${{ steps.validate-package-name.outputs.PYTHON_PACKAGE_DIST_NAME }}
-      REF_TO_CHECKOUT: ${{ steps.validate-ref.outputs.REF_TO_CHECKOUT }}
 
     steps:
       - name: Validate and set DIST_DIR
@@ -87,18 +81,6 @@ jobs:
           echo "Using PYTHON_PACKAGE_DIST_NAME: $PYTHON_PACKAGE_DIST_NAME"
           echo "PYTHON_PACKAGE_DIST_NAME=$PYTHON_PACKAGE_DIST_NAME" >> $GITHUB_OUTPUT
 
-      - name: Validate and set REF_TO_CHECKOUT
-        id: validate-ref
-        env:
-          REF_TO_CHECKOUT: ${{ inputs.REF_TO_CHECKOUT }}
-        run: |
-          if [[ ! "$REF_TO_CHECKOUT" =~ ^refs/(heads|pull|tags)/[A-Za-z0-9._/-]+$ ]]; then
-            echo "Invalid ref: $REF_TO_CHECKOUT"
-            exit 1
-          fi
-          echo "Checking out ref: $REF_TO_CHECKOUT"
-          echo "REF_TO_CHECKOUT=$REF_TO_CHECKOUT" >> $GITHUB_OUTPUT
-
   build-dist:
     needs: validate-inputs
     name: Build Dist
@@ -108,11 +90,25 @@ jobs:
       - name: Set Default Branch
         run: |
           git config --global init.defaultBranch main
+      
+      - name: Set ref
+        id: set-ref
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request_target" ]]; then
+            echo "Using PR merge ref to avoid running workflows on forked repo."
+            echo "ref=refs/pull/${{ github.event.pull_request.number }}/merge" >> $GITHUB_OUTPUT
+          elif [[ -n "${{ github.ref || '' }}" ]]; then
+            echo "Using github.ref"
+            echo "ref=${{ github.ref }}" >> $GITHUB_OUTPUT
+          else
+            echo "Using fallback default ref"
+            echo "ref=refs/heads/main" >> $GITHUB_OUTPUT
+          fi
 
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.validate-inputs.outputs.REF_TO_CHECKOUT }}
+          ref: ${{ steps.set-ref.outputs.ref }}
           submodules: recursive
           token: ${{ secrets.CHECKOUT_SHARED }}
 
