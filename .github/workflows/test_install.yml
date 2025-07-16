@@ -65,9 +65,21 @@ jobs:
         run: |
           git config --global init.defaultBranch main
 
+      - name: Set ref
+        id: set-ref
+        run: |
+          if [[ -n "${{ github.ref || '' }}" ]]; then
+            echo "Using github.ref"
+            echo "ref=${{ github.ref }}" >> $GITHUB_OUTPUT
+          else
+            echo "Using fallback default ref"
+            echo "ref=refs/heads/main" >> $GITHUB_OUTPUT
+          fi
+
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
+          ref: ${{ steps.set-ref.outputs.ref }}
           submodules: recursive
           token: ${{ secrets.CHECKOUT_SHARED }}
 
