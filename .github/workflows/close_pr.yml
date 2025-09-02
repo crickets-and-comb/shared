@@ -66,7 +66,8 @@ jobs:
             echo "REASON is required."
             exit 1
           fi
-          if ! [[ "$REASON" =~ ^[A-Za-z0-9_ -]+$ ]]; then
+          REGEX='^[A-Za-z0-9_ -]+$'
+          if ! [[ "$REASON" =~ $REGEX ]]; then
             echo "Invalid REASON: $REASON"
             exit 1
           fi
