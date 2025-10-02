@@ -38,13 +38,30 @@ You'll need to `cd` into shared and checkout main, as it starts as a detached he
 
 ### Setting tokens and keys
 
+#### Personal access tokens
+
 The shared workflows rely on a Personal Access Token (PAT) (to checkout this submodule so they can use the make targets). You need to create a PAT with repo access and add it to the consuming repo's action secrets as `CHECKOUT_SHARED`. See GitHub for how to set up PATs (hint: check the developer settings on your personal account) and how to add secrets to a repo's actions (hint: check the repo's settings).
 
 Note: Using a PAT tied to a single user like this is less than ideal. Figuring out how to get around this is a welcome security upgrade.
 
 And, if you want to use the workflow that auto-deletes PRs from outside your org, `block_outside_PRs.yml`, you need a secret named `ORG_READ_TOKEN` that has org read permissions.
 
+#### Safety
+
 Similarly, the workflow that runs QC, `CI.yml`, needs a key in the environment/secrets. To run the `safety` tool in the `security` make target, you need to register (for free) with Safety and get an API key: https://safetycli.com. You can use the key in two ways: by passing it to the `safety` command with the `--key` flag, or by adding it to your env as `SAFETY_API_KEY`. We do both, depending on which shared resource you're using and in what context. To use your key to run the workflow on GitHub, add it to your repo's secrets as `SAFETY_API_KEY`. To run the workflow locally, you need `SAFETY_API_KEY` in your env, in your `.env` file. This will work for running the `security` make target or `safety` locally, too, but you can also pass it to `make security` (after the command to use the var in the Makefile: `make security SAFETY_API_KEY=supersecretkey`).
+
+#### Jake
+
+To run the `jake` tool in the `security` make target, you may eventually need to register (for free) with OSS Index: https://ossindex.sonatype.org/user/register. You then need to grab your OSS Index username and API token and add them to a config file in your home directory to run `make security` locally, and add them as repo secrets on GitHub to run the `CI.yml` workflow.
+
+Create this file locally, `~/oss-index.config`:
+
+```config
+username: my-oss-index-username
+password: my-oss-index-API-key
+```
+
+Add `OSSINDEX_USERNAME` and `OSSINDEX_PASSWORD` as GitHub secrets.
 
 ### Docs deployment
 
