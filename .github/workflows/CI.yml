@@ -75,6 +75,7 @@ jobs:
         run: |
           echo "username: ${{ secrets.OSSINDEX_USERNAME }}" > $HOME/.oss-index.config
           echo "password: ${{ secrets.OSSINDEX_PASSWORD }}" >> $HOME/.oss-index.config
+          chmod 600 $HOME/.oss-index.config
           conda run -n ${{ env.DEV_ENV_NAME }} make SAFETY_API_KEY=${{ secrets.SAFETY_API_KEY }} full-qc
 
       - name: Run Tests
