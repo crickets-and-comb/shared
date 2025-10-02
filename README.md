@@ -54,7 +54,7 @@ Similarly, the workflow that runs QC, `CI.yml`, needs a key in the environment/s
 
 To run the `jake` tool in the `security` make target, you may eventually need to register (for free) with OSS Index: https://ossindex.sonatype.org/user/register. You then need to grab your OSS Index username and API token and add them to a config file in your home directory to run `make security` locally, and add them as repo secrets on GitHub to run the `CI.yml` workflow.
 
-Create this file locally, `~/oss-index.config`:
+Create this file locally, `~/.oss-index.config`:
 
 ```config
 username: my-oss-index-username
