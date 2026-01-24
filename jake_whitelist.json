@@ -19,6 +19,10 @@
         {
             "id": "CVE-2024-34997",
             "comment": "CWE-502: Deserialization of Untrusted Data. Disputed by supplier. Not a vulnerability in Python 3.13."
+        },
+        {
+            "id": "CVE-2025-71176",
+            "comment": "CWE-379: Creation of Temporary File in Directory with Incorrect Permissions: pytest through 9.0.2 on UNIX relies on directories with the /tmp/pytest-of-{user} name pattern, which allows local users to cause a denial of service or possibly gain privileges."
         }
     ]
 }
