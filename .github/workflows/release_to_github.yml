@@ -108,7 +108,7 @@ jobs:
       - name: Get Version from Dist
         id: extract_version
         run: |
-          pip install pkginfo -c shared/constraints.txt
+          pip install pkginfo
           
           tarball=$(ls ${{ needs.validate-inputs.outputs.DIST_DIR }}/*.tar.gz | head -n 1)
           wheel=$(ls ${{ needs.validate-inputs.outputs.DIST_DIR }}/*.whl | head -n 1)
