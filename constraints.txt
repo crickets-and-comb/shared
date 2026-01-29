@@ -1,3 +1,12 @@
-pandas>1.0.3
-parso>0.4.0
-wheel>=0.46.2,<1.0.0
+# Scientific Python SPEC-0000 support window: https://scientific-python.org/specs/spec-0000/#support-window
+ipython>=8.22.0,<9.8.0
+matplotlib>=3.9.0,<3.11.0
+networkx>=3.3.0,<3.7.0
+numpy>=2.0.0,<2.4.0
+pandas>2.3.0,<2.4.0
+python>=3.12.0,<3.15.0
+scikit-image>=0.23.0,<0.26.0
+scikit-learn>=1.5.0,<1.8.0
+scipy>=1.13.0,<1.17.0
+xarray>=2024.3.0,<2025.12.0
+zarr>=2.18.0,<3.2.0
