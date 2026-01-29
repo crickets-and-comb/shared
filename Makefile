@@ -39,7 +39,7 @@ build-env: # Build the dev env. You may want to add other extras here like mysql
 
 install: # Install this package in local editable mode.
 	python -m pip install --upgrade pip setuptools
-	python -m pip install -e ${REPO_ROOT}${INSTALL_EXTRAS} -c shared/constraints.txt
+	python -m pip install -e ${REPO_ROOT}${INSTALL_EXTRAS}
 
 full: # Run a "full" install, QC, test, and build. You'll need to have the environment already activated even though it rebuilds it.
 	$(MAKE) build-env install INSTALL_EXTRAS=[dev] full-qc full-test build-doc build-package
