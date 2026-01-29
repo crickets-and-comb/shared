@@ -203,7 +203,7 @@ We run test workflows on a matrix of Python versions and OS versions.
 
 While we run installation tests on Ubuntu, macOS, and Windows to ensure published packages work on all three, we run pre-publishing QC only on Ubuntu and macOS. The reason for this is that QC uses our dev tools and we don't yet support dev on Windows. Supporting Windows dev tools may only require a simple set of changes (e.g., conditionally setting filepath syntax), and is a welcome upgrade on the list of TODOs.
 
-We run QC and installation tests on a Python matrix as well (3.11 - 3.13 at time of writing). We set this matrix based on the Scientific Python SPEC 0 support window https://scientific-python.org/specs/spec-0000/#support-window. This support window includes common packages for scientific computing (e.g., `numpy` and `pandas`), and we recommend keeping relevant dependencies pinned within this support window when consuming these shared tools.
+We run QC and installation tests on a Python matrix as well (3.12 - 3.13 at time of writing). We set this matrix based on the Scientific Python SPEC 0 support window https://scientific-python.org/specs/spec-0000/#support-window. This support window includes common packages for scientific computing (e.g., `numpy` and `pandas`), and we recommend keeping relevant dependencies pinned within this support window when consuming these shared tools.
 
 See `.github/workflows/CI.yml` and `.github/workflows/test_install.yml`.
 
