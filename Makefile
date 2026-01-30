@@ -21,7 +21,7 @@ MATRIX_OS ?= ubuntu-latest
 MATRIX_PYTHON_VERSION ?=
 TEST_OR_PROD ?= dev
 
-# Temporary workaround to skip pytest on Python 3.13+ until pytype is replaced. See https://github.com/crickets-and-comb/shared/issues/99
+# Temporary workaround to skip pytype on Python 3.13+ until pytype is replaced. See https://github.com/crickets-and-comb/shared/issues/99
 ifeq ($(PYTHON_VERSION),3.12)
 REQUIRE_PYTYPE := 1
 else
