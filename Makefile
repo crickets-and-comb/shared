@@ -70,8 +70,12 @@ security: # Check for vulnerabilities.
 	pip list | jake ddt --whitelist=shared/jake_whitelist.json
 	conda list --json | jake ddt --type=CONDA_JSON --whitelist=shared/jake_whitelist.json
 
-typecheck: # Check typing.
-	pytype --config=${REPO_ROOT}shared/pytype.cfg -- ${QC_DIRS}
+typecheck: # Check typing (runs only if pytype is installed).
+	@if command -v pytype >/dev/null 2>&1; then \
+		pytype --config="${REPO_ROOT}shared/pytype.cfg" -- ${QC_DIRS}; \
+	else \
+		echo "pytype not installed; skipping typecheck"; \
+	fi
 
 run-test: # Base call to pytest. (Export MARKER to specify the test type.)
 	pytest -m ${MARKER} ${REPO_ROOT} --rootdir ${REPO_ROOT} -c ${REPO_ROOT}pyproject.toml
