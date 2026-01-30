@@ -20,50 +20,7 @@ env:
   CONDA_VERSION: latest
 
 jobs:
-  sanitize-inputs:
-    name: Sanitize Inputs
-    runs-on: ubuntu-latest
-    outputs:
-      CHECKOUT_SHARED: ${{ steps.sanitize-checkout-shared.outputs.CHECKOUT_SHARED }}
-      OSSINDEX_USERNAME: ${{ steps.sanitize-ossindex-username.outputs.OSSINDEX_USERNAME }}
-      OSSINDEX_PASSWORD: ${{ steps.sanitize-ossindex-password.outputs.OSSINDEX_PASSWORD }}
-      SAFETY_API_KEY: ${{ steps.sanitize-safety-api-key.outputs.SAFETY_API_KEY }}
-
-    steps:
-      - name: Sanitize CHECKOUT_SHARED
-        id: sanitize-checkout-shared
-        env:
-          CHECKOUT_SHARED: ${{ secrets.CHECKOUT_SHARED }}
-        run: |
-          echo "Received CHECKOUT_SHARED: [REDACTED]"
-          echo "CHECKOUT_SHARED=$CHECKOUT_SHARED" >> $GITHUB_OUTPUT
-
-      - name: Sanitize OSSINDEX_USERNAME
-        id: sanitize-ossindex-username
-        env:
-          OSSINDEX_USERNAME: ${{ secrets.OSSINDEX_USERNAME }}
-        run: |
-          echo "Received OSSINDEX_USERNAME: [REDACTED]"
-          echo "OSSINDEX_USERNAME=$OSSINDEX_USERNAME" >> $GITHUB_OUTPUT
-
-      - name: Sanitize OSSINDEX_PASSWORD
-        id: sanitize-ossindex-password
-        env:
-          OSSINDEX_PASSWORD: ${{ secrets.OSSINDEX_PASSWORD }}
-        run: |
-          echo "Received OSSINDEX_PASSWORD: [REDACTED]"
-          echo "OSSINDEX_PASSWORD=$OSSINDEX_PASSWORD" >> $GITHUB_OUTPUT
-      
-      - name: Sanitize SAFETY_API_KEY
-        id: sanitize-safety-api-key
-        env:
-          SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
-        run: |
-          echo "Received SAFETY_API_KEY: [REDACTED]"
-          echo "SAFETY_API_KEY=$SAFETY_API_KEY" >> $GITHUB_OUTPUT
-
   CI:
-    needs: sanitize-inputs
     name: QC and Tests
     strategy:
       matrix:
@@ -95,7 +52,7 @@ jobs:
         with:
           ref: ${{ steps.set-ref.outputs.ref }}
           submodules: recursive
-          token: ${{ needs.sanitize-inputs.outputs.CHECKOUT_SHARED }} # Token with full repo scope.
+          token: ${{ secrets.CHECKOUT_SHARED }} # Token with full repo scope.
         
       - name: Setup Conda
         uses: conda-incubator/setup-miniconda@v3
@@ -114,10 +71,10 @@ jobs:
       - name: Run QC
         if: ${{ contains(matrix.os, 'ubuntu') }}
         run: |
-          echo "username: ${{ needs.sanitize-inputs.outputs.OSSINDEX_USERNAME }}" > $HOME/.oss-index.config
-          echo "password: ${{ needs.sanitize-inputs.outputs.OSSINDEX_PASSWORD }}" >> $HOME/.oss-index.config
+          echo "username: ${{ secrets.OSSINDEX_USERNAME }}" > $HOME/.oss-index.config
+          echo "password: ${{ secrets.OSSINDEX_PASSWORD }}" >> $HOME/.oss-index.config
           chmod 600 $HOME/.oss-index.config
-          conda run -n ${{ env.DEV_ENV_NAME }} make full-qc SAFETY_API_KEY=${{ needs.sanitize-inputs.outputs.SAFETY_API_KEY }} PYTHON_VERSION=${{ matrix.python-version }}
+          conda run -n ${{ env.DEV_ENV_NAME }} make full-qc SAFETY_API_KEY=${{ secrets.SAFETY_API_KEY }} PYTHON_VERSION=${{ matrix.python-version }}
 
       - name: Run Tests
         run: |
