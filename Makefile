@@ -21,7 +21,12 @@ MATRIX_OS ?= ubuntu-latest
 MATRIX_PYTHON_VERSION ?=
 TEST_OR_PROD ?= dev
 
-RUN_PYTYPE ?= $(if $(PYTHON_VERSION) == 3.12,TRUE,FALSE) # Temporary workaround to skip pytest on Python 3.13+ until pytype is replaced. See https://github.com/crickets-and-comb/shared/issues/99
+# Temporary workaround to skip pytest on Python 3.13+ until pytype is replaced. See https://github.com/crickets-and-comb/shared/issues/99
+ifeq ($(PYTHON_VERSION),3.12)
+REQUIRE_PYTYPE := 1
+else
+REQUIRE_PYTYPE := 0
+endif
 
 EXCLUDED_TARGETS_FROM_LIST ?= # Just excludes from list-makes. Doesn't remove from available targets.
 .DEFAULT_GOAL = list-makes
@@ -77,7 +82,7 @@ security: # Check for vulnerabilities.
 typecheck: # Check typing (runs only if pytype is installed).
 	@if command -v pytype >/dev/null 2>&1; then \
 		pytype --config="${REPO_ROOT}shared/pytype.cfg" -- ${QC_DIRS}; \
-	elif [ "$$RUN_PYTYPE" = "true" ] || [ "$$RUN_PYTYPE" = "1" ]; then \
+	if [ "$(REQUIRE_PYTYPE)" = "1" ]; then \
 		echo "ERROR: pytype not installed but required in CI environment; failing typecheck"; \
 		exit 1; \
 	else \
