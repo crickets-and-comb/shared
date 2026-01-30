@@ -81,12 +81,15 @@ security: # Check for vulnerabilities.
 # https://github.com/crickets-and-comb/shared/issues/99
 typecheck: # Check typing (runs only if pytype is installed).
 	@if command -v pytype >/dev/null 2>&1; then \
+		echo "Running pytype"; \
 		pytype --config="${REPO_ROOT}shared/pytype.cfg" -- ${QC_DIRS}; \
-	if [ "$(REQUIRE_PYTYPE)" = "1" ]; then \
-		echo "ERROR: pytype not installed but required in CI environment; failing typecheck"; \
-		exit 1; \
 	else \
-		echo "pytype not installed; skipping typecheck (local development)"; \
+		if [ "$(REQUIRE_PYTYPE)" = "1" ]; then \
+			echo "ERROR: pytype is required for Python $(PYTHON_VERSION) but is not installed"; \
+			exit 1; \
+		else \
+			echo "pytype not installed; skipping typecheck"; \
+		fi; \
 	fi
 
 run-test: # Base call to pytest. (Export MARKER to specify the test type.)
