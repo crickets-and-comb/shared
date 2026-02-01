@@ -95,7 +95,7 @@ typecheck: # Check typing (runs only if pytype is installed).
 	fi
 	@if command -v pyrefly >/dev/null 2>&1; then \
 		echo "Running pyrefly"; \
-		pyrefly ${QC_DIRS}; \
+		pyrefly check ${QC_DIRS}; \
 	else \
 		if [ "$(REQUIRE_PYREFLY)" = "1" ]; then \
 			echo "ERROR: pyrefly is required but is not installed"; \
