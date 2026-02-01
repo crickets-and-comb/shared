@@ -101,7 +101,7 @@ typecheck: # Check typing (runs only if pytype is installed).
 			echo "ERROR: pyrefly is required but is not installed"; \
 			exit 1; \
 		else \
-			echo "pyrefly not installed; skipping"; \
+			echo "pyrefly not installed; skipping typecheck"; \
 		fi; \
 	fi
 
