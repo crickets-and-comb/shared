@@ -28,6 +28,8 @@ else
 REQUIRE_PYTYPE := 0
 endif
 
+REQUIRE_PYREFLY := 0
+
 EXCLUDED_TARGETS_FROM_LIST ?= # Just excludes from list-makes. Doesn't remove from available targets.
 .DEFAULT_GOAL = list-makes
 .PHONY: build-doc build-env build-package clean delete-all-branches delete-local-branch delete-remote-branch e2e format full full-qc full-test install integration lint list-makes remove-env run-act security typecheck unit update-shared
@@ -89,6 +91,17 @@ typecheck: # Check typing (runs only if pytype is installed).
 			exit 1; \
 		else \
 			echo "pytype not installed; skipping typecheck"; \
+		fi; \
+	fi
+	@if command -v pyrefly >/dev/null 2>&1; then \
+		echo "Running pyrefly"; \
+		pyrefly ${QC_DIRS}; \
+	else \
+		if [ "$(REQUIRE_PYREFLY)" = "1" ]; then \
+			echo "ERROR: pyrefly is required but is not installed"; \
+			exit 1; \
+		else \
+			echo "pyrefly not installed; skipping"; \
 		fi; \
 	fi
 
