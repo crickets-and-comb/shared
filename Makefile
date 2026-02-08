@@ -81,7 +81,7 @@ security: # Check for vulnerabilities.
 
 # TODO: Phase out pytype in favor of mypy or another typechecker that supports Python 3.13+.
 # https://github.com/crickets-and-comb/shared/issues/99
-typecheck: # Check typing (runs only if typecheckers are installed and enabled).
+typecheck: # Check typing (runs typecheckers that are installed and enabled).
 	@if [ "$(RUN_PYTYPE)" = "1" ]; then \
 		pytype --config="${REPO_ROOT}shared/pytype.cfg" -- ${QC_DIRS}; \
 	else \
