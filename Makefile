@@ -21,6 +21,12 @@ MATRIX_OS ?= ubuntu-latest
 MATRIX_PYTHON_VERSION ?=
 TEST_OR_PROD ?= dev
 
+
+# Security opt-ins:
+RUN_BANDIT ?= 1
+RUN_SAFETY ?= 1
+RUN_PIP_AUDIT ?= 1
+
 # Temporary workaround to skip pytype on Python 3.13+ until pytype is replaced. See https://github.com/crickets-and-comb/shared/issues/99
 ifeq ($(PYTHON_VERSION),3.12)
 RUN_PYTYPE ?= 1
@@ -71,14 +77,31 @@ lint: # Check style and formatting. Should agree with format and only catch what
 	flake8 --config ${REPO_ROOT}shared/.flake8 ${QC_DIRS}
 
 security: # Check for vulnerabilities.
-	bandit -r ${REPO_ROOT}src
-	safety ${SAFETY_KEY_FLAG} scan
-	safety ${SAFETY_KEY_FLAG} scan --target shared
-	# pip-audit replaces jake which had issues with Python 3.12+ due to pkg_resources deprecation.
-	# Ignored CVEs are documented in jake_whitelist.json (kept for reference) with justifications.
-	pip-audit \
-		--ignore-vuln CVE-2018-20225 --ignore-vuln CVE-2019-12760 --ignore-vuln CVE-2020-13091 \
-		--ignore-vuln CVE-2024-9880 --ignore-vuln CVE-2024-34997 --ignore-vuln CVE-2025-71176
+	if [ "$(RUN_BANDIT)" = "1" ]; then \
+		echo "Running bandit..."; \
+		bandit -r ${REPO_ROOT}src; \
+	else \
+		echo "Skipping bandit."; \
+	fi
+
+	if [ "$(RUN_SAFETY)" = "1" ]; then \
+		echo "Running safety..."; \
+		safety ${SAFETY_KEY_FLAG} scan; \
+		safety ${SAFETY_KEY_FLAG} scan --target shared; \
+	else \
+		echo "Skipping safety."; \
+	fi
+
+# pip-audit replaces jake which had issues with Python 3.12+ due to pkg_resources deprecation.
+# Ignored CVEs are documented in jake_whitelist.json (kept for reference) with justifications.
+	if [ "$(RUN_PIP_AUDIT)" = "1" ]; then \
+		echo "Running pip-audit..."; \
+		pip-audit \
+			--ignore-vuln CVE-2018-20225 --ignore-vuln CVE-2019-12760 --ignore-vuln CVE-2020-13091 \
+			--ignore-vuln CVE-2024-9880 --ignore-vuln CVE-2024-34997 --ignore-vuln CVE-2025-71176; \
+	else \
+		echo "Skipping pip-audit."; \
+	fi
 
 # TODO: Phase out pytype in favor of mypy or another typechecker that supports Python 3.13+.
 # https://github.com/crickets-and-comb/shared/issues/99
