@@ -138,9 +138,9 @@ RUN_PYRIGHT := 1
 ```
 
 Each typechecker will:
-- Run only if both enabled via `RUN_{TOOL}=1` and installed
-- Fail if enabled but not installed
-- Skip with a message if not enabled or not installed
+- Run only if enabled via `RUN_{TOOL}=1`
+- Fail naturally if enabled but the tool is not installed
+- Skip with a message if not enabled
 
 ### Workflows: usage and limitations
 

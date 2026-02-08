@@ -81,25 +81,16 @@ security: # Check for vulnerabilities.
 
 # TODO: Phase out pytype in favor of mypy or another typechecker that supports Python 3.13+.
 # https://github.com/crickets-and-comb/shared/issues/99
-typecheck: # Check typing (runs enabled typecheckers; pytype runs if enabled, pyright runs if enabled and installed).
+typecheck: # Check typing (runs enabled typecheckers).
 	@if [ "$(RUN_PYTYPE)" = "1" ]; then \
 		pytype --config="${REPO_ROOT}shared/pytype.cfg" -- ${QC_DIRS}; \
 	else \
 		echo "Skipping pytype."; \
 	fi
 	@if [ "$(RUN_PYRIGHT)" = "1" ]; then \
-		if command -v pyright >/dev/null 2>&1; then \
-			pyright ${QC_DIRS}; \
-		else \
-			echo "ERROR: RUN_PYRIGHT=1 but pyright is not installed."; \
-			exit 1; \
-		fi; \
+		pyright ${QC_DIRS}; \
 	else \
-		if command -v pyright >/dev/null 2>&1; then \
-			echo "Skipping pyright (installed but RUN_PYRIGHT=0)."; \
-		else \
-			echo "Skipping pyright (not installed)."; \
-		fi; \
+		echo "Skipping pyright."; \
 	fi
 
 run-test: # Base call to pytest. (Export MARKER to specify the test type.)
