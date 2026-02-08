@@ -114,13 +114,7 @@ typecheck: # Check typing (runs only if pytype is installed).
 	fi
 
 	if [ "$(RUN_BASEDPYRIGHT)" = "1" ]; then \
-		if command -v basedpyright >/dev/null 2>&1; then \
-			echo "Running basedpyright..."; \
-			basedpyright ${QC_DIRS}; \
-		else \
-			echo "Error: basedpyright is not installed but RUN_BASEDPYRIGHT=1"; \
-			exit 1; \
-		fi; \
+		basedpyright ${QC_DIRS}; \
 	else \
 		echo "Skipping basedpyright."; \
 	fi

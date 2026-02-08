@@ -126,7 +126,7 @@ export
 include shared/Makefile
 ```
 
-If a type checker is enabled (`RUN_<TOOL> = 1`) but not installed, the `typecheck` target will fail with an error message. If a type checker is disabled (`RUN_<TOOL> = 0`), it will be skipped with a message.
+If a type checker is enabled (`RUN_<TOOL> = 1`) but not installed, the `typecheck` target will fail when attempting to run the tool. If a type checker is disabled (`RUN_<TOOL> = 0`), it will be skipped with a message.
 
 ### Workflows: usage and limitations
 
