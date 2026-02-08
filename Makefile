@@ -23,9 +23,9 @@ TEST_OR_PROD ?= dev
 
 # Temporary workaround to skip pytype on Python 3.13+ until pytype is replaced. See https://github.com/crickets-and-comb/shared/issues/99
 ifeq ($(PYTHON_VERSION),3.12)
-REQUIRE_PYTYPE := 1
+RUN_PYTYPE := 1
 else
-REQUIRE_PYTYPE := 0
+RUN_PYTYPE := 0
 endif
 
 EXCLUDED_TARGETS_FROM_LIST ?= # Just excludes from list-makes. Doesn't remove from available targets.
@@ -80,16 +80,10 @@ security: # Check for vulnerabilities.
 # TODO: Phase out pytype in favor of mypy or another typechecker that supports Python 3.13+.
 # https://github.com/crickets-and-comb/shared/issues/99
 typecheck: # Check typing (runs only if pytype is installed).
-	@if command -v pytype >/dev/null 2>&1; then \
-		echo "Running pytype"; \
+	@if [ "$(RUN_PYTYPE)" = "1" ]; then \
 		pytype --config="${REPO_ROOT}shared/pytype.cfg" -- ${QC_DIRS}; \
 	else \
-		if [ "$(REQUIRE_PYTYPE)" = "1" ]; then \
-			echo "ERROR: pytype is required for Python $(PYTHON_VERSION) but is not installed"; \
-			exit 1; \
-		else \
-			echo "pytype not installed; skipping typecheck"; \
-		fi; \
+		echo "Skipping pytype."; \
 	fi
 
 run-test: # Base call to pytest. (Export MARKER to specify the test type.)
