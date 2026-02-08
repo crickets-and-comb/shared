@@ -97,6 +97,7 @@ typecheck: # Check typing (runs enabled typecheckers).
 	fi
 
 	@if [ "$(RUN_PYRIGHT)" = "1" ]; then \
+		echo "Running pyright..."; \
 		pyright ${QC_DIRS}; \
 	else \
 		echo "Skipping pyright."; \
