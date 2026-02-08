@@ -83,11 +83,13 @@ security: # Check for vulnerabilities.
 # https://github.com/crickets-and-comb/shared/issues/99
 typecheck: # Check typing (runs only if pytype is installed).
 	@if [ "$(RUN_PYTYPE)" = "1" ]; then \
+		echo "Running pytype..."; \
 		pytype --config="${REPO_ROOT}shared/pytype.cfg" -- ${QC_DIRS}; \
 	else \
 		echo "Skipping pytype."; \
 	fi
 	@if [ "$(RUN_PYREFLY)" = "1" ]; then \
+		echo "Running pyrefly..."; \
 		pyrefly check ${QC_DIRS}; \
 	else \
 		echo "Skipping pyrefly."; \
