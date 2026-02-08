@@ -115,17 +115,6 @@ typecheck: # Check typing (runs enabled typecheckers).
 	else \
 		echo "Skipping pytype."; \
 	fi
-
-	if [ "$(RUN_MYPY)" = "1" ]; then \
-		if command -v mypy > /dev/null 2>&1; then \
-			mypy --config-file="${REPO_ROOT}shared/mypy.ini" ${QC_DIRS}; \
-		else \
-			echo "Error: mypy is not installed but RUN_MYPY=1"; \
-			exit 1; \
-		fi; \
-	else \
-		echo "Skipping mypy."; \
-	fi
 	
 	@if [ "$(RUN_PYREFLY)" = "1" ]; then \
 		echo "Running pyrefly..."; \
@@ -139,6 +128,17 @@ typecheck: # Check typing (runs enabled typecheckers).
 		pyright ${QC_DIRS}; \
 	else \
 		echo "Skipping pyright."; \
+	fi
+
+	if [ "$(RUN_MYPY)" = "1" ]; then \
+		if command -v mypy > /dev/null 2>&1; then \
+			mypy --config-file="${REPO_ROOT}shared/mypy.ini" ${QC_DIRS}; \
+		else \
+			echo "Error: mypy is not installed but RUN_MYPY=1"; \
+			exit 1; \
+		fi; \
+	else \
+		echo "Skipping mypy."; \
 	fi
 
 run-test: # Base call to pytest. (Export MARKER to specify the test type.)
