@@ -7,8 +7,6 @@ INSTALL_EXTRAS ?= [dev] # [build] [dev] [qc] [test] [doc]
 
 CHECKOUT_SHARED ?= $(shell grep CHECKOUT_SHARED .env | cut -d '=' -f2)
 ORG_READ_TOKEN ?= $(shell grep ORG_READ_TOKEN .env | cut -d '=' -f2)
-OSSINDEX_USERNAME ?= $(shell grep username $${HOME}/.oss-index.config | cut -d ':' -f2 | tr -d ' ')
-OSSINDEX_PASSWORD ?= $(shell grep password $${HOME}/.oss-index.config | cut -d ':' -f2 | tr -d ' ')
 SAFETY_API_KEY ?= $(shell grep SAFETY_API_KEY .env | cut -d '=' -f2) # Your safety API key. For local dev, you can simply add SAFETY_API_KEY to your environment via a .env file or explicit export.
 SAFETY_KEY_FLAG = $(if $(SAFETY_API_KEY),--key $(SAFETY_API_KEY),)
 
@@ -150,6 +148,5 @@ run-act: # Run the CI-CD workflow.
 	$(MAKE) set-CI-CD-file
 
 	act ${ACT_RUN_EVENT} -W .github/workflows/CI_CD_act.yml --defaultbranch main ${MATRIX_OS_FLAG} ${MATRIX_PYTHON_VERSION_FLAG} \
-		-s CHECKOUT_SHARED=${CHECKOUT_SHARED} -s ORG_READ_TOKEN=${ORG_READ_TOKEN} \
-		-s OSSINDEX_USERNAME=${OSSINDEX_USERNAME} -s OSSINDEX_PASSWORD=${OSSINDEX_PASSWORD} -s SAFETY_API_KEY=${SAFETY_API_KEY} \
+		-s CHECKOUT_SHARED=${CHECKOUT_SHARED} -s ORG_READ_TOKEN=${ORG_READ_TOKEN} -s SAFETY_API_KEY=${SAFETY_API_KEY} \
 		--input TEST_OR_PROD=${TEST_OR_PROD} --input PYTHON_BUILD_VERSION=${PYTHON_BUILD_VERSION}
