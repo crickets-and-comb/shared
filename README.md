@@ -56,10 +56,6 @@ The `security` make target uses `pip-audit` (from PyPA) to check for vulnerabili
 
 If you need to ignore specific vulnerabilities, they are configured directly in the Makefile's `security` target using `--ignore-vuln` flags.
 
-**Note for Python 3.14+**: You may see cache deserialization warnings from CacheControl (a dependency of pip-audit). These are non-fatal warnings that occur when cache entries from older Python versions are incompatible. To avoid them:
-- Run `pip cache purge` before running security checks
-- Or modify the Makefile to add `--cache-dir /tmp/pip-audit-cache` to the pip-audit command
-
 ### Docs deployment
 
 We use `peaceiris/actions-gh-pages` to deploy docs to GitHub Pages (e.g., https://crickets-and-comb.github.io/reference_package/). You'll need to keep a branch on the remote called `gh-pages`.
