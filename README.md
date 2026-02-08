@@ -50,18 +50,11 @@ And, if you want to use the workflow that auto-deletes PRs from outside your org
 
 Similarly, the workflow that runs QC, `CI.yml`, needs a key in the environment/secrets. To run the `safety` tool in the `security` make target, you need to register (for free) with Safety and get an API key: https://safetycli.com. You can use the key in two ways: by passing it to the `safety` command with the `--key` flag, or by adding it to your env as `SAFETY_API_KEY`. We do both, depending on which shared resource you're using and in what context. To use your key to run the workflow on GitHub, add it to your repo's secrets as `SAFETY_API_KEY`. To run the workflow locally, you need `SAFETY_API_KEY` in your env, in your `.env` file. This will work for running the `security` make target or `safety` locally, too, but you can also pass it to `make security` (after the command to use the var in the Makefile: `make security SAFETY_API_KEY=supersecretkey`).
 
-#### Jake
+#### pip-audit
 
-To run the `jake` tool in the `security` make target, you may eventually need to register (for free) with OSS Index: https://ossindex.sonatype.org/user/register. You then need to grab your OSS Index username and API token and add them to a config file in your home directory to run `make security` locally, and add them as repo secrets on GitHub to run the `CI.yml` workflow.
+The `security` make target uses `pip-audit` (from PyPA) to check for vulnerabilities in Python dependencies. This tool does not require any API keys or authentication and works with Python 3.12+, unlike the deprecated `jake` tool which relied on `pkg_resources`.
 
-Create this file locally, `~/.oss-index.config`:
-
-```config
-username: my-oss-index-username
-password: my-oss-index-API-key
-```
-
-Add `OSSINDEX_USERNAME` and `OSSINDEX_PASSWORD` as GitHub secrets.
+If you need to ignore specific vulnerabilities, they are configured directly in the Makefile's `security` target using `--ignore-vuln` flags.
 
 ### Docs deployment
 
@@ -196,6 +189,50 @@ Note also that, GitHub actions will fail if it sees a workflow using relative pa
 You may want to use GitHub to test out the changes you pushed to the shared branch you're developing in. To checkout the right commit of the shared submodule when testing a workflow on GitHub, you'll need to check a few things. First, make sure you have the branch set in your consuming repo's `.gitmodules` file. Second, make sure you've committed, in the consuming repo, the commit hash you're testing of the shared repo submodule. Thirdly, make sure the workflow call URLs are set to the dev branch like  `crickets-and-comb/shared/.github/workflows/CI.yml@dev-branch`.
 
 It's tricky developing shared workflows, but if you're just developing the consuming repo's package itself, you shouldn't need to even use `run-act`. The `full*` make targets in `Makefile` should suffice. They will run on your local machine without Docker and will look in your shared submodule without any special direction.
+
+## Migration Guide: jake → pip-audit
+
+**Important**: As of version 0.24.0, the `shared` repository has replaced `jake` with `pip-audit` for vulnerability scanning to fix compatibility issues with Python 3.12+ (due to `pkg_resources` deprecation).
+
+### For consuming repositories:
+
+If your repository uses the shared submodule and has `jake` listed in its dependencies (e.g., in `setup.cfg` under `[options.extras_require]`), you'll need to:
+
+1. **Update dependencies**: Replace `jake` with `pip-audit` in your `setup.cfg` or `pyproject.toml`:
+   ```diff
+   qc =
+       bandit
+       ...
+   -   jake
+   +   pip-audit
+       ...
+   ```
+
+2. **Remove OSSINDEX configuration**: The `pip-audit` tool doesn't require OSS Index authentication, so you can:
+   - Remove any `~/.oss-index.config` files (optional, won't hurt if left).
+   - Remove any OSSINDEX-related secrets from your GitHub workflows (optional as of 0.24.0, but no longer used and will be deprecated in 0.25.0).
+
+3. **Update shared submodule**: Make sure your shared submodule is pointing to the latest version:
+   ```bash
+   cd shared
+   git checkout main
+   git pull
+   cd ..
+   git add shared
+   git commit -m "Update shared submodule to use pip-audit"
+   ```
+
+4. **Reinstall dev dependencies**: After updating your setup.cfg/pyproject.toml:
+   ```bash
+   pip install -e .[dev]  # or your equivalent dev extras
+   ```
+
+### Benefits of pip-audit over jake:
+
+- **Python 3.12+ compatible**: No dependency on deprecated `pkg_resources`
+- **Official PyPA tool**: Better maintained and integrated with Python ecosystem
+- **No authentication required**: Simpler setup, no need for OSS Index credentials
+- **Same functionality**: Checks PyPI vulnerabilities using the PyPA Advisory Database
 
 ## Matrix build and support window
 
