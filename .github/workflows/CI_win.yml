@@ -5,10 +5,6 @@ on:
     secrets:
       CHECKOUT_SHARED:
         required: true
-      OSSINDEX_USERNAME:
-        required: false
-      OSSINDEX_PASSWORD:
-        required: false
       SAFETY_API_KEY:
         required: true
 
