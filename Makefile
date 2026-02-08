@@ -33,6 +33,7 @@ RUN_PYTYPE ?= 0
 endif
 RUN_PYREFLY ?= 0
 RUN_PYRIGHT ?= 0
+RUN_TY ?= 0
 
 EXCLUDED_TARGETS_FROM_LIST ?= # Just excludes from list-makes. Doesn't remove from available targets.
 .DEFAULT_GOAL = list-makes
@@ -126,6 +127,13 @@ typecheck: # Check typing (runs enabled typecheckers).
 		pyright ${QC_DIRS}; \
 	else \
 		echo "Skipping pyright."; \
+	fi
+
+	@if [ "$(RUN_TY)" = "1" ]; then \
+		echo "Running ty..."; \
+		ty check ${QC_DIRS}; \
+	else \
+		echo "Skipping ty."; \
 	fi
 
 run-test: # Base call to pytest. (Export MARKER to specify the test type.)
