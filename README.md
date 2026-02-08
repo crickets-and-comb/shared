@@ -192,7 +192,7 @@ It's tricky developing shared workflows, but if you're just developing the consu
 
 ## Migration Guide: jake → pip-audit
 
-**Important**: As of version 0.23.8, the `shared` repository has replaced `jake` with `pip-audit` for vulnerability scanning to fix compatibility issues with Python 3.12+ (due to `pkg_resources` deprecation).
+**Important**: As of version 0.24.0, the `shared` repository has replaced `jake` with `pip-audit` for vulnerability scanning to fix compatibility issues with Python 3.12+ (due to `pkg_resources` deprecation).
 
 ### For consuming repositories:
 
