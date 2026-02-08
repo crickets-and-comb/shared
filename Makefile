@@ -94,6 +94,13 @@ security: # Check for vulnerabilities.
 
 # pip-audit replaces jake which had issues with Python 3.12+ due to pkg_resources deprecation.
 # Ignored CVEs are documented in jake_whitelist.json (kept for reference) with justifications.
+# CVE-2018-20225: Ignoring as the use of --extra-index-url is secure in pip install in workflows/install_package.yaml.
+# TODO: Remove vulnerabilities around constraints.txt because we no longer use it.
+# CVE-2019-12760: `constraints.txt` constrains installations to parso > 0.4.0.
+# CVE-2020-13091: `constraints.txt` constrains installations to pandas > 1.3.0.
+# CVE-2024-9880: This can be avoided by validating user input passed to pandas.DataFrame.query.
+# CVE-2024-34997: CWE-502: Deserialization of Untrusted Data. Disputed by supplier. Not a vulnerability in Python 3.13.
+# CVE-2025-71176: CWE-379: Creation of Temporary File in Directory with Incorrect Permissions: pytest through 9.0.2 on UNIX relies on directories with the /tmp/pytest-of-{user} name pattern, which allows local users to cause a denial of service or possibly gain privileges.
 	if [ "$(RUN_PIP_AUDIT)" = "1" ]; then \
 		echo "Running pip-audit..."; \
 		pip-audit \
