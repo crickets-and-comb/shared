@@ -92,8 +92,6 @@ security: # Check for vulnerabilities.
 		echo "Skipping safety."; \
 	fi
 
-# pip-audit replaces jake which had issues with Python 3.12+ due to pkg_resources deprecation.
-# Ignored CVEs are documented in jake_whitelist.json (kept for reference) with justifications.
 # CVE-2018-20225: Ignoring as the use of --extra-index-url is secure in pip install in workflows/install_package.yaml.
 # CVE-2024-9880: This can be avoided by validating user input passed to pandas.DataFrame.query.
 # CVE-2024-34997: CWE-502: Deserialization of Untrusted Data. Disputed by supplier. Not a vulnerability in Python 3.13.
