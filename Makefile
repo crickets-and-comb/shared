@@ -32,6 +32,8 @@ else
 RUN_PYTYPE ?= 0
 endif
 
+RUN_MYPY ?= 0
+
 EXCLUDED_TARGETS_FROM_LIST ?= # Just excludes from list-makes. Doesn't remove from available targets.
 .DEFAULT_GOAL = list-makes
 .PHONY: build-doc build-env build-package clean delete-all-branches delete-local-branch delete-remote-branch e2e format full full-qc full-test install integration lint list-makes remove-env run-act security typecheck unit update-shared
@@ -104,11 +106,27 @@ security: # Check for vulnerabilities.
 
 # TODO: Phase out pytype in favor of mypy or another typechecker that supports Python 3.13+.
 # https://github.com/crickets-and-comb/shared/issues/99
-typecheck: # Check typing (runs only if pytype is installed).
+typecheck: # Check typing (runs pytype and mypy if configured).
 	if [ "$(RUN_PYTYPE)" = "1" ]; then \
-		pytype --config="${REPO_ROOT}shared/pytype.cfg" -- ${QC_DIRS}; \
+		if command -v pytype > /dev/null 2>&1; then \
+			pytype --config="${REPO_ROOT}shared/pytype.cfg" -- ${QC_DIRS}; \
+		else \
+			echo "Error: pytype is not installed but RUN_PYTYPE=1"; \
+			exit 1; \
+		fi; \
 	else \
 		echo "Skipping pytype."; \
+	fi
+
+	if [ "$(RUN_MYPY)" = "1" ]; then \
+		if command -v mypy > /dev/null 2>&1; then \
+			mypy --config-file="${REPO_ROOT}shared/mypy.ini" ${QC_DIRS}; \
+		else \
+			echo "Error: mypy is not installed but RUN_MYPY=1"; \
+			exit 1; \
+		fi; \
+	else \
+		echo "Skipping mypy."; \
 	fi
 
 run-test: # Base call to pytest. (Export MARKER to specify the test type.)
