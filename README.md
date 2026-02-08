@@ -190,6 +190,50 @@ You may want to use GitHub to test out the changes you pushed to the shared bran
 
 It's tricky developing shared workflows, but if you're just developing the consuming repo's package itself, you shouldn't need to even use `run-act`. The `full*` make targets in `Makefile` should suffice. They will run on your local machine without Docker and will look in your shared submodule without any special direction.
 
+## Migration Guide: jake → pip-audit
+
+**Important**: As of version 0.23.8, the `shared` repository has replaced `jake` with `pip-audit` for vulnerability scanning to fix compatibility issues with Python 3.12+ (due to `pkg_resources` deprecation).
+
+### For consuming repositories:
+
+If your repository uses the shared submodule and has `jake` listed in its dependencies (e.g., in `setup.cfg` under `[options.extras_require]`), you'll need to:
+
+1. **Update dependencies**: Replace `jake` with `pip-audit` in your `setup.cfg` or `pyproject.toml`:
+   ```diff
+   qc =
+       bandit
+       ...
+   -   jake
+   +   pip-audit
+       ...
+   ```
+
+2. **Remove OSSINDEX configuration**: The `pip-audit` tool doesn't require OSS Index authentication, so you can:
+   - Remove any `~/.oss-index.config` files (optional, won't hurt if left)
+   - OSSINDEX secrets in GitHub workflows are now optional (but still supported for backward compatibility)
+
+3. **Update shared submodule**: Make sure your shared submodule is pointing to the latest version:
+   ```bash
+   cd shared
+   git checkout main
+   git pull
+   cd ..
+   git add shared
+   git commit -m "Update shared submodule to use pip-audit"
+   ```
+
+4. **Reinstall dev dependencies**: After updating your setup.cfg/pyproject.toml:
+   ```bash
+   pip install -e .[dev]  # or your equivalent dev extras
+   ```
+
+### Benefits of pip-audit over jake:
+
+- **Python 3.12+ compatible**: No dependency on deprecated `pkg_resources`
+- **Official PyPA tool**: Better maintained and integrated with Python ecosystem
+- **No authentication required**: Simpler setup, no need for OSS Index credentials
+- **Same functionality**: Checks PyPI vulnerabilities using the PyPA Advisory Database
+
 ## Matrix build and support window
 
 We run test workflows on a matrix of Python versions and OS versions.
