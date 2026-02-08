@@ -6,9 +6,9 @@ on:
       CHECKOUT_SHARED:
         required: true
       OSSINDEX_USERNAME:
-        required: true
+        required: false
       OSSINDEX_PASSWORD:
-        required: true
+        required: false
       SAFETY_API_KEY:
         required: true
 
@@ -71,9 +71,6 @@ jobs:
       - name: Run QC
         if: ${{ contains(matrix.os, 'ubuntu') }}
         run: |
-          echo "username: ${{ secrets.OSSINDEX_USERNAME }}" > $HOME/.oss-index.config
-          echo "password: ${{ secrets.OSSINDEX_PASSWORD }}" >> $HOME/.oss-index.config
-          chmod 600 $HOME/.oss-index.config
           conda run -n ${{ env.DEV_ENV_NAME }} make full-qc SAFETY_API_KEY=${{ secrets.SAFETY_API_KEY }} PYTHON_VERSION=${{ matrix.python-version }}
 
       - name: Run Tests

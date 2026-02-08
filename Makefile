@@ -74,8 +74,9 @@ security: # Check for vulnerabilities.
 	bandit -r ${REPO_ROOT}src
 	safety ${SAFETY_KEY_FLAG} scan
 	safety ${SAFETY_KEY_FLAG} scan --target shared
-	pip list | jake ddt --whitelist=shared/jake_whitelist.json
-	conda list --json | jake ddt --type=CONDA_JSON --whitelist=shared/jake_whitelist.json
+	# pip-audit replaces jake which had issues with Python 3.12+ due to pkg_resources deprecation.
+	# Ignored CVEs are documented in jake_whitelist.json with justifications.
+	pip-audit --ignore-vuln CVE-2018-20225 --ignore-vuln CVE-2019-12760 --ignore-vuln CVE-2020-13091 --ignore-vuln CVE-2024-9880 --ignore-vuln CVE-2024-34997 --ignore-vuln CVE-2025-71176
 
 # TODO: Phase out pytype in favor of mypy or another typechecker that supports Python 3.13+.
 # https://github.com/crickets-and-comb/shared/issues/99
