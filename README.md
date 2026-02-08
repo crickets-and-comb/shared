@@ -125,7 +125,7 @@ You can override shared make targets or add new targets that aren't in the share
 
 The `typecheck` make target supports multiple typecheckers that can be conditionally enabled in consuming repos. Currently supported typecheckers include:
 
-- **pytype**: Enabled by default on Python 3.12 (set `RUN_PYTYPE ?= 1` in your Makefile to override)
+- **pytype**: Enabled by default on Python 3.12 (set `RUN_PYTYPE := 1` in your Makefile to override)
 - **pyright**: Disabled by default (set `RUN_PYRIGHT := 1` in your Makefile to enable)
 
 To enable a typechecker in your consuming repo's Makefile:
