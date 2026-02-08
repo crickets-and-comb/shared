@@ -75,7 +75,7 @@ security: # Check for vulnerabilities.
 	safety ${SAFETY_KEY_FLAG} scan
 	safety ${SAFETY_KEY_FLAG} scan --target shared
 	# pip-audit replaces jake which had issues with Python 3.12+ due to pkg_resources deprecation.
-	# Ignored CVEs are documented in jake_whitelist.json with justifications.
+	# Ignored CVEs are documented in jake_whitelist.json (kept for reference) with justifications.
 	pip-audit --ignore-vuln CVE-2018-20225 --ignore-vuln CVE-2019-12760 --ignore-vuln CVE-2020-13091 --ignore-vuln CVE-2024-9880 --ignore-vuln CVE-2024-34997 --ignore-vuln CVE-2025-71176
 
 # TODO: Phase out pytype in favor of mypy or another typechecker that supports Python 3.13+.
