@@ -80,16 +80,10 @@ security: # Check for vulnerabilities.
 # TODO: Phase out pytype in favor of mypy or another typechecker that supports Python 3.13+.
 # https://github.com/crickets-and-comb/shared/issues/99
 typecheck: # Check typing (runs only if pytype is installed).
-	@if command -v pytype >/dev/null 2>&1; then \
-		echo "Running pytype"; \
+	@if [ "$(RUN_PYTYPE)" = "1" ]; then \
 		pytype --config="${REPO_ROOT}shared/pytype.cfg" -- ${QC_DIRS}; \
 	else \
-		if [ "$(RUN_PYTYPE)" = "1" ]; then \
-			echo "ERROR: pytype is required for Python $(PYTHON_VERSION) but is not installed"; \
-			exit 1; \
-		else \
-			echo "pytype not installed; skipping typecheck"; \
-		fi; \
+		echo "Skipping pytype."; \
 	fi
 
 run-test: # Base call to pytest. (Export MARKER to specify the test type.)
