@@ -27,7 +27,7 @@ RUN_PYTYPE ?= 1
 else
 RUN_PYTYPE ?= 0
 endif
-
+RUN_PYREFLY ?= 0
 RUN_PYRIGHT ?= 0
 
 EXCLUDED_TARGETS_FROM_LIST ?= # Just excludes from list-makes. Doesn't remove from available targets.
@@ -83,10 +83,19 @@ security: # Check for vulnerabilities.
 # https://github.com/crickets-and-comb/shared/issues/99
 typecheck: # Check typing (runs enabled typecheckers).
 	@if [ "$(RUN_PYTYPE)" = "1" ]; then \
+		echo "Running pytype..."; \
 		pytype --config="${REPO_ROOT}shared/pytype.cfg" -- ${QC_DIRS}; \
 	else \
 		echo "Skipping pytype."; \
 	fi
+
+	@if [ "$(RUN_PYREFLY)" = "1" ]; then \
+		echo "Running pyrefly..."; \
+		pyrefly check ${QC_DIRS}; \
+	else \
+		echo "Skipping pyrefly."; \
+	fi
+
 	@if [ "$(RUN_PYRIGHT)" = "1" ]; then \
 		pyright ${QC_DIRS}; \
 	else \

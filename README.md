@@ -121,26 +121,26 @@ Consuming Makefiles should point to the shared submodule as a subdirectory. But,
 
 You can override shared make targets or add new targets that aren't in the shared Makefile by adding them to the consuming repo's top-level Makefile.
 
-### Typechecking configuration
+### Typechecking tools
 
-The `typecheck` make target supports multiple typecheckers that can be conditionally enabled in consuming repos. Currently supported typecheckers include:
+The `typecheck` make target supports multiple typechecking tools that can be optionally enabled in consuming repos:
 
-- **pytype**: Enabled by default on Python 3.12 (set `RUN_PYTYPE := 1` in your Makefile to override)
-- **pyright**: Disabled by default (set `RUN_PYRIGHT := 1` in your Makefile to enable)
+- **pytype**: Enabled by default for Python 3.12. Currently disabled for Python 3.13+ (see https://github.com/crickets-and-comb/shared/issues/99). You can override `RUN_PYTYPE` in your consuming repo's Makefile to explicitly enable or disable it.
 
-To enable a typechecker in your consuming repo's Makefile:
+- **pyrefly**: Disabled by default. (Set `RUN_PYRIGHT := 1` in your Makefile to enable.)
+
+- **pyright**: Disabled by default. (Set `RUN_PYRIGHT := 1` in your Makefile to enable.)
+
+Example of enabling ``pyrefly`` in consuming repo's Makefile:
 
 ```makefile
+RUN_PYREFLY := 1
+
 export
 include shared/Makefile
-
-RUN_PYRIGHT := 1
 ```
 
-Each typechecker will:
-- Run only if enabled via `RUN_{TOOL}=1`
-- Fail naturally if enabled but the tool is not installed
-- Skip with a message if not enabled
+Each typechecker will run if its `RUN_{TOOL}` variable is set to `1`, otherwise it will be skipped with a message.
 
 ### Workflows: usage and limitations
 
