@@ -32,6 +32,8 @@ else
 RUN_PYTYPE ?= 0
 endif
 
+RUN_BASEDPYRIGHT ?= 0
+
 EXCLUDED_TARGETS_FROM_LIST ?= # Just excludes from list-makes. Doesn't remove from available targets.
 .DEFAULT_GOAL = list-makes
 .PHONY: build-doc build-env build-package clean delete-all-branches delete-local-branch delete-remote-branch e2e format full full-qc full-test install integration lint list-makes remove-env run-act security typecheck unit update-shared
@@ -109,6 +111,18 @@ typecheck: # Check typing (runs only if pytype is installed).
 		pytype --config="${REPO_ROOT}shared/pytype.cfg" -- ${QC_DIRS}; \
 	else \
 		echo "Skipping pytype."; \
+	fi
+
+	if [ "$(RUN_BASEDPYRIGHT)" = "1" ]; then \
+		if command -v basedpyright >/dev/null 2>&1; then \
+			echo "Running basedpyright..."; \
+			basedpyright ${QC_DIRS}; \
+		else \
+			echo "Error: basedpyright is not installed but RUN_BASEDPYRIGHT=1"; \
+			exit 1; \
+		fi; \
+	else \
+		echo "Skipping basedpyright."; \
 	fi
 
 run-test: # Base call to pytest. (Export MARKER to specify the test type.)

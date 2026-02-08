@@ -114,6 +114,20 @@ Consuming Makefiles should point to the shared submodule as a subdirectory. But,
 
 You can override shared make targets or add new targets that aren't in the shared Makefile by adding them to the consuming repo's top-level Makefile.
 
+### Typecheck opt-ins
+
+The shared `Makefile` includes support for multiple type checkers. By default, `pytype` is enabled for Python 3.12 (but disabled for 3.13+ due to compatibility issues), and `basedpyright` is disabled by default.
+
+To enable `basedpyright` in your consuming repository, set `RUN_BASEDPYRIGHT = 1` in your `Makefile` before including the shared `Makefile`:
+
+```makefile
+RUN_BASEDPYRIGHT = 1
+export
+include shared/Makefile
+```
+
+If a type checker is enabled (`RUN_<TOOL> = 1`) but not installed, the `typecheck` target will fail with an error message. If a type checker is disabled (`RUN_<TOOL> = 0`), it will be skipped with a message.
+
 ### Workflows: usage and limitations
 
 The shared workflows (in `.github/workflows` or `shared/.github/workflows` from the consuming workflow) are reusable workflows, meaning they can can be called from within other workflows. See https://docs.github.com/en/actions/sharing-automations/reusing-workflows.
