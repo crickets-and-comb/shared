@@ -23,9 +23,9 @@ TEST_OR_PROD ?= dev
 
 # Temporary workaround to skip pytype on Python 3.13+ until pytype is replaced. See https://github.com/crickets-and-comb/shared/issues/99
 ifeq ($(PYTHON_VERSION),3.12)
-RUN_PYTYPE := 1
+RUN_PYTYPE ?= 1
 else
-RUN_PYTYPE := 0
+RUN_PYTYPE ?= 0
 endif
 
 EXCLUDED_TARGETS_FROM_LIST ?= # Just excludes from list-makes. Doesn't remove from available targets.
