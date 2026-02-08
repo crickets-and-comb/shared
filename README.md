@@ -125,21 +125,18 @@ You can override shared make targets or add new targets that aren't in the share
 
 The `typecheck` make target supports multiple typechecking tools that can be optionally enabled in consuming repos:
 
-- **pytype**: Enabled by default for Python 3.12. Currently disabled for Python 3.13+ (see https://github.com/crickets-and-comb/shared/issues/99). You can override `REQUIRE_PYTYPE` in your consuming repo's Makefile to explicitly enable or disable it.
+- **pytype**: Enabled by default for Python 3.12. Currently disabled for Python 3.13+ (see https://github.com/crickets-and-comb/shared/issues/99). You can override `RUN_PYTYPE` in your consuming repo's Makefile to explicitly enable or disable it.
 
-- **pyrefly**: Disabled by default. To enable pyrefly in your consuming repo, set `REQUIRE_PYREFLY := 1` in your Makefile before including the shared Makefile:
+- **pyrefly**: Disabled by default. To enable pyrefly in your consuming repo, set `RUN_PYREFLY := 1` in your Makefile before including the shared Makefile:
 
 ```makefile
-REQUIRE_PYREFLY := 1
+RUN_PYREFLY := 1
 
 export
 include shared/Makefile
 ```
 
-Each typechecker will:
-- Run if the tool is installed
-- Fail the build if `REQUIRE_{TOOL}` is set to `1` but the tool is not installed
-- Skip with a message if not installed and not required
+Each typechecker will run if its `RUN_{TOOL}` variable is set to `1`, otherwise it will be skipped with a message.
 
 ### Workflows: usage and limitations
 
