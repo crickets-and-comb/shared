@@ -96,6 +96,7 @@ security: # Check for vulnerabilities.
 # CVE-2024-9880: This can be avoided by validating user input passed to pandas.DataFrame.query.
 # CVE-2024-34997: CWE-502: Deserialization of Untrusted Data. Disputed by supplier. Not a vulnerability in Python 3.13.
 # CVE-2025-71176: CWE-379: Creation of Temporary File in Directory with Incorrect Permissions: pytest through 9.0.2 on UNIX relies on directories with the /tmp/pytest-of-{user} name pattern, which allows local users to cause a denial of service or possibly gain privileges.
+# TODO: Drop CVE-2024-34997 from pip-audit ignore list when dropping Python 3.12 support. https://github.com/crickets-and-comb/shared/issues/34
 	if [ "$(RUN_PIP_AUDIT)" = "1" ]; then \
 		echo "Running pip-audit..."; \
 		pip-audit --ignore-vuln CVE-2018-20225 --ignore-vuln CVE-2024-9880 --ignore-vuln CVE-2024-34997 --ignore-vuln CVE-2025-71176; \
