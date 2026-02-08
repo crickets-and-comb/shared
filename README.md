@@ -209,8 +209,8 @@ If your repository uses the shared submodule and has `jake` listed in its depend
    ```
 
 2. **Remove OSSINDEX configuration**: The `pip-audit` tool doesn't require OSS Index authentication, so you can:
-   - Remove any `~/.oss-index.config` files (optional, won't hurt if left)
-   - OSSINDEX secrets in GitHub workflows are now optional (but still supported for backward compatibility)
+   - Remove any `~/.oss-index.config` files (optional, won't hurt if left).
+   - Remove any OSSINDEX-related secrets from your GitHub workflows (optional as of 0.24.0, but no longer used and will be deprecated in 0.25.0).
 
 3. **Update shared submodule**: Make sure your shared submodule is pointing to the latest version:
    ```bash
