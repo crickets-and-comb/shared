@@ -28,6 +28,8 @@ else
 RUN_PYTYPE ?= 0
 endif
 
+RUN_PYREFLY ?= 0
+
 EXCLUDED_TARGETS_FROM_LIST ?= # Just excludes from list-makes. Doesn't remove from available targets.
 .DEFAULT_GOAL = list-makes
 .PHONY: build-doc build-env build-package clean delete-all-branches delete-local-branch delete-remote-branch e2e format full full-qc full-test install integration lint list-makes remove-env run-act security typecheck unit update-shared
@@ -84,6 +86,11 @@ typecheck: # Check typing (runs only if pytype is installed).
 		pytype --config="${REPO_ROOT}shared/pytype.cfg" -- ${QC_DIRS}; \
 	else \
 		echo "Skipping pytype."; \
+	fi
+	@if [ "$(RUN_PYREFLY)" = "1" ]; then \
+		pyrefly check ${QC_DIRS}; \
+	else \
+		echo "Skipping pyrefly."; \
 	fi
 
 run-test: # Base call to pytest. (Export MARKER to specify the test type.)
