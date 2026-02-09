@@ -139,6 +139,7 @@ typecheck: # Check typing (runs enabled typecheckers).
 	fi
 
 	if [ "$(RUN_BASEDPYRIGHT)" = "1" ]; then \
+		echo "Running basedpyright..."; \
 		basedpyright ${QC_DIRS}; \
 	else \
 		echo "Skipping basedpyright."; \
