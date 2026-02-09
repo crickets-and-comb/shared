@@ -120,13 +120,15 @@ The `typecheck` make target supports multiple typechecking tools that can be opt
 
 - **pytype**: Enabled by default for Python 3.12. Currently disabled for Python 3.13+ (see https://github.com/crickets-and-comb/shared/issues/99). You can override `RUN_PYTYPE` in your consuming repo's Makefile to explicitly enable or disable it.
 
-- **pyrefly**: Disabled by default. (Set `RUN_PYRIGHT := 1` in your Makefile to enable.)
+- **pyrefly**: Disabled by default. (Set `RUN_PYREFLY := 1` in your Makefile to enable.)
 
 - **pyright**: Disabled by default. (Set `RUN_PYRIGHT := 1` in your Makefile to enable.)
 
 - **mypy**: Disabled by default. (Set `RUN_MYPY := 1` in your Makefile to enable.)
 
 - **basedpyright**: Disabled by default. (Set `RUN_BASEDPYRIGHT := 1` in your Makefile to enable.)
+
+- **ty**: Disabled by default. (Set `RUN_TY := 1` in your Makefile to enable.)
 
 Example of enabling ``pyrefly`` in consuming repo's Makefile:
 
