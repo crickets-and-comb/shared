@@ -33,7 +33,6 @@ RUN_PYTYPE ?= 0
 endif
 RUN_PYREFLY ?= 0
 RUN_PYRIGHT ?= 0
-
 RUN_MYPY ?= 0
 
 EXCLUDED_TARGETS_FROM_LIST ?= # Just excludes from list-makes. Doesn't remove from available targets.
@@ -131,12 +130,8 @@ typecheck: # Check typing (runs enabled typecheckers).
 	fi
 
 	if [ "$(RUN_MYPY)" = "1" ]; then \
-		if command -v mypy > /dev/null 2>&1; then \
-			mypy --config-file="${REPO_ROOT}shared/mypy.ini" ${QC_DIRS}; \
-		else \
-			echo "Error: mypy is not installed but RUN_MYPY=1"; \
-			exit 1; \
-		fi; \
+		echo "Running mypy..."; \
+		mypy --config-file="${REPO_ROOT}shared/mypy.ini" ${QC_DIRS}; \
 	else \
 		echo "Skipping mypy."; \
 	fi
