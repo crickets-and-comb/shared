@@ -56,19 +56,6 @@ The `security` make target uses `pip-audit` (from PyPA) to check for vulnerabili
 
 If you need to ignore specific vulnerabilities, they are configured directly in the Makefile's `security` target using `--ignore-vuln` flags.
 
-#### Type checking
-
-The `typecheck` make target supports two type checkers: `pytype` and `mypy`. Both are optional and disabled by default.
-
-- **pytype**: Set `RUN_PYTYPE=1` in your consuming repo's Makefile to enable pytype. Note: pytype only runs on Python 3.12 due to compatibility issues with Python 3.13+.
-- **mypy**: Set `RUN_MYPY=1` in your consuming repo's Makefile to enable mypy. mypy works with Python 3.12+.
-
-Both tools will fail the build if enabled (`RUN_{tool}=1`) but not installed. If disabled (the default), they are skipped with an informational message.
-
-Configuration files for both tools are in the shared directory:
-- `shared/pytype.cfg` for pytype
-- `shared/mypy.ini` for mypy
-
 ### Docs deployment
 
 We use `peaceiris/actions-gh-pages` to deploy docs to GitHub Pages (e.g., https://crickets-and-comb.github.io/reference_package/). You'll need to keep a branch on the remote called `gh-pages`.
@@ -136,6 +123,8 @@ The `typecheck` make target supports multiple typechecking tools that can be opt
 - **pyrefly**: Disabled by default. (Set `RUN_PYRIGHT := 1` in your Makefile to enable.)
 
 - **pyright**: Disabled by default. (Set `RUN_PYRIGHT := 1` in your Makefile to enable.)
+
+- **mypy**: Disabled by default. (Set `RUN_MYPY := 1` in your Makefile to enable.)
 
 Example of enabling ``pyrefly`` in consuming repo's Makefile:
 
