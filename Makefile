@@ -131,7 +131,7 @@ typecheck: # Check typing (runs enabled typecheckers).
 
 	if [ "$(RUN_MYPY)" = "1" ]; then \
 		echo "Running mypy..."; \
-		mypy --config-file="${REPO_ROOT}shared/mypy.ini" ${QC_DIRS}; \
+		mypy ${QC_DIRS}; \
 	else \
 		echo "Skipping mypy."; \
 	fi
