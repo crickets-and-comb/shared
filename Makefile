@@ -35,6 +35,8 @@ RUN_PYREFLY ?= 0
 RUN_PYRIGHT ?= 0
 RUN_MYPY ?= 0
 
+RUN_BASEDPYRIGHT ?= 0
+
 EXCLUDED_TARGETS_FROM_LIST ?= # Just excludes from list-makes. Doesn't remove from available targets.
 .DEFAULT_GOAL = list-makes
 .PHONY: build-doc build-env build-package clean delete-all-branches delete-local-branch delete-remote-branch e2e format full full-qc full-test install integration lint list-makes remove-env run-act security typecheck unit update-shared
@@ -134,6 +136,13 @@ typecheck: # Check typing (runs enabled typecheckers).
 		mypy ${QC_DIRS}; \
 	else \
 		echo "Skipping mypy."; \
+	fi
+
+	if [ "$(RUN_BASEDPYRIGHT)" = "1" ]; then \
+		echo "Running basedpyright..."; \
+		basedpyright ${QC_DIRS}; \
+	else \
+		echo "Skipping basedpyright."; \
 	fi
 
 run-test: # Base call to pytest. (Export MARKER to specify the test type.)

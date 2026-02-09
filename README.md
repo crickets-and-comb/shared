@@ -114,7 +114,7 @@ Consuming Makefiles should point to the shared submodule as a subdirectory. But,
 
 You can override shared make targets or add new targets that aren't in the shared Makefile by adding them to the consuming repo's top-level Makefile.
 
-### Typechecking tools
+### Typecheck opt-ins
 
 The `typecheck` make target supports multiple typechecking tools that can be optionally enabled in consuming repos:
 
@@ -125,6 +125,8 @@ The `typecheck` make target supports multiple typechecking tools that can be opt
 - **pyright**: Disabled by default. (Set `RUN_PYRIGHT := 1` in your Makefile to enable.)
 
 - **mypy**: Disabled by default. (Set `RUN_MYPY := 1` in your Makefile to enable.)
+
+- **basedpyright**: Disabled by default. (Set `RUN_BASEDPYRIGHT := 1` in your Makefile to enable.)
 
 Example of enabling ``pyrefly`` in consuming repo's Makefile:
 
