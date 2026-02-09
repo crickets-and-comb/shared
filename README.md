@@ -141,6 +141,32 @@ include shared/Makefile
 
 Each typechecker will run if its `RUN_{TOOL}` variable is set to `1`, otherwise it will be skipped with a message.
 
+#### Typecheck timing
+
+The `typecheck` target automatically measures and displays the runtime of each enabled typechecker. After all typecheckers have run, a summary table will be displayed showing:
+
+- The runtime (in seconds) for each tool that ran
+- The status (PASS/FAIL) for each tool
+- The total runtime for the entire typecheck process
+
+This timing information is displayed regardless of whether any typecheckers fail, making it easy to compare performance between different typechecking tools.
+
+Example output:
+
+```
+===========================================
+  Typecheck Results
+===========================================
+
+Tool                 Time (s)     Status  
+----                 --------     ------  
+pytype               45           PASS    
+mypy                 23           PASS    
+
+Total Time:          68 s        
+===========================================
+```
+
 ### Workflows: usage and limitations
 
 The shared workflows (in `.github/workflows` or `shared/.github/workflows` from the consuming workflow) are reusable workflows, meaning they can can be called from within other workflows. See https://docs.github.com/en/actions/sharing-automations/reusing-workflows.

@@ -110,47 +110,117 @@ security: # Check for vulnerabilities.
 # TODO: Phase out pytype in favor of mypy or another typechecker that supports Python 3.13+.
 # https://github.com/crickets-and-comb/shared/issues/99
 typecheck: # Check typing (runs enabled typecheckers).
+	@echo ""; \
+	echo "==========================================="; \
+	echo "  Starting typecheck..."; \
+	echo "==========================================="; \
+	echo ""; \
+	total_start=$$SECONDS; \
+	timing_results=""; \
+	exit_code=0; \
+	\
 	if [ "$(RUN_PYTYPE)" = "1" ]; then \
 		echo "Running pytype..."; \
-		pytype --config="${REPO_ROOT}shared/pytype.cfg" -- ${QC_DIRS}; \
-	else \
-		echo "Skipping pytype."; \
-	fi
-
+		tool_start=$$SECONDS; \
+		if pytype --config="${REPO_ROOT}shared/pytype.cfg" -- ${QC_DIRS}; then \
+			tool_status="PASS"; \
+		else \
+			tool_status="FAIL"; \
+			exit_code=1; \
+		fi; \
+		tool_time=$$(($$SECONDS - tool_start)); \
+		timing_results="$$timing_results\npytype|$$tool_time|$$tool_status"; \
+	fi; \
+	\
 	if [ "$(RUN_PYRIGHT)" = "1" ]; then \
 		echo "Running pyright..."; \
-		pyright ${QC_DIRS}; \
-	else \
-		echo "Skipping pyright."; \
-	fi
-
+		tool_start=$$SECONDS; \
+		if pyright ${QC_DIRS}; then \
+			tool_status="PASS"; \
+		else \
+			tool_status="FAIL"; \
+			exit_code=1; \
+		fi; \
+		tool_time=$$(($$SECONDS - tool_start)); \
+		timing_results="$$timing_results\npyright|$$tool_time|$$tool_status"; \
+	fi; \
+	\
 	if [ "$(RUN_MYPY)" = "1" ]; then \
 		echo "Running mypy..."; \
-		mypy ${QC_DIRS}; \
-	else \
-		echo "Skipping mypy."; \
-	fi
-
+		tool_start=$$SECONDS; \
+		if mypy ${QC_DIRS}; then \
+			tool_status="PASS"; \
+		else \
+			tool_status="FAIL"; \
+			exit_code=1; \
+		fi; \
+		tool_time=$$(($$SECONDS - tool_start)); \
+		timing_results="$$timing_results\nmypy|$$tool_time|$$tool_status"; \
+	fi; \
+	\
 	if [ "$(RUN_TY)" = "1" ]; then \
 		echo "Running ty..."; \
-		ty check ${QC_DIRS}; \
-	else \
-		echo "Skipping ty."; \
-	fi
-
+		tool_start=$$SECONDS; \
+		if ty check ${QC_DIRS}; then \
+			tool_status="PASS"; \
+		else \
+			tool_status="FAIL"; \
+			exit_code=1; \
+		fi; \
+		tool_time=$$(($$SECONDS - tool_start)); \
+		timing_results="$$timing_results\nty|$$tool_time|$$tool_status"; \
+	fi; \
+	\
 	if [ "$(RUN_BASEDPYRIGHT)" = "1" ]; then \
 		echo "Running basedpyright..."; \
-		basedpyright ${QC_DIRS}; \
-	else \
-		echo "Skipping basedpyright."; \
-	fi
-	
+		tool_start=$$SECONDS; \
+		if basedpyright ${QC_DIRS}; then \
+			tool_status="PASS"; \
+		else \
+			tool_status="FAIL"; \
+			exit_code=1; \
+		fi; \
+		tool_time=$$(($$SECONDS - tool_start)); \
+		timing_results="$$timing_results\nbasedpyright|$$tool_time|$$tool_status"; \
+	fi; \
+	\
 	if [ "$(RUN_PYREFLY)" = "1" ]; then \
 		echo "Running pyrefly..."; \
-		pyrefly check ${QC_DIRS}; \
+		tool_start=$$SECONDS; \
+		if pyrefly check ${QC_DIRS}; then \
+			tool_status="PASS"; \
+		else \
+			tool_status="FAIL"; \
+			exit_code=1; \
+		fi; \
+		tool_time=$$(($$SECONDS - tool_start)); \
+		timing_results="$$timing_results\npyrefly|$$tool_time|$$tool_status"; \
+	fi; \
+	\
+	total_time=$$(($$SECONDS - total_start)); \
+	\
+	echo ""; \
+	echo "==========================================="; \
+	echo "  Typecheck Results"; \
+	echo "==========================================="; \
+	if [ -n "$$timing_results" ]; then \
+		echo ""; \
+		printf "%-20s %-12s %-8s\n" "Tool" "Time (s)" "Status"; \
+		printf "%-20s %-12s %-8s\n" "----" "--------" "------"; \
+		echo "$$timing_results" | grep -v "^$$" | while IFS='|' read -r tool time status; do \
+			printf "%-20s %-12s %-8s\n" "$$tool" "$$time" "$$status"; \
+		done; \
+		echo ""; \
+		printf "%-20s %-12s\n" "Total Time:" "$$total_time s"; \
 	else \
-		echo "Skipping pyrefly."; \
-	fi
+		echo ""; \
+		echo "No typecheckers were enabled."; \
+		echo ""; \
+		printf "%-20s %-12s\n" "Total Time:" "$$total_time s"; \
+	fi; \
+	echo "==========================================="; \
+	echo ""; \
+	exit $$exit_code
 
 run-test: # Base call to pytest. (Export MARKER to specify the test type.)
 	pytest -m ${MARKER} ${REPO_ROOT} --rootdir ${REPO_ROOT} -c ${REPO_ROOT}pyproject.toml
