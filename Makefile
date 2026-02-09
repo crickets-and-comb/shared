@@ -33,6 +33,7 @@ RUN_PYTYPE ?= 0
 endif
 RUN_PYREFLY ?= 0
 RUN_PYRIGHT ?= 0
+RUN_MYPY ?= 0
 
 EXCLUDED_TARGETS_FROM_LIST ?= # Just excludes from list-makes. Doesn't remove from available targets.
 .DEFAULT_GOAL = list-makes
@@ -107,25 +108,32 @@ security: # Check for vulnerabilities.
 # TODO: Phase out pytype in favor of mypy or another typechecker that supports Python 3.13+.
 # https://github.com/crickets-and-comb/shared/issues/99
 typecheck: # Check typing (runs enabled typecheckers).
-	@if [ "$(RUN_PYTYPE)" = "1" ]; then \
+	if [ "$(RUN_PYTYPE)" = "1" ]; then \
 		echo "Running pytype..."; \
 		pytype --config="${REPO_ROOT}shared/pytype.cfg" -- ${QC_DIRS}; \
 	else \
 		echo "Skipping pytype."; \
 	fi
-
-	@if [ "$(RUN_PYREFLY)" = "1" ]; then \
+	
+	if [ "$(RUN_PYREFLY)" = "1" ]; then \
 		echo "Running pyrefly..."; \
 		pyrefly check ${QC_DIRS}; \
 	else \
 		echo "Skipping pyrefly."; \
 	fi
 
-	@if [ "$(RUN_PYRIGHT)" = "1" ]; then \
+	if [ "$(RUN_PYRIGHT)" = "1" ]; then \
 		echo "Running pyright..."; \
 		pyright ${QC_DIRS}; \
 	else \
 		echo "Skipping pyright."; \
+	fi
+
+	if [ "$(RUN_MYPY)" = "1" ]; then \
+		echo "Running mypy..."; \
+		mypy ${QC_DIRS}; \
+	else \
+		echo "Skipping mypy."; \
 	fi
 
 run-test: # Base call to pytest. (Export MARKER to specify the test type.)

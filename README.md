@@ -124,6 +124,8 @@ The `typecheck` make target supports multiple typechecking tools that can be opt
 
 - **pyright**: Disabled by default. (Set `RUN_PYRIGHT := 1` in your Makefile to enable.)
 
+- **mypy**: Disabled by default. (Set `RUN_MYPY := 1` in your Makefile to enable.)
+
 Example of enabling ``pyrefly`` in consuming repo's Makefile:
 
 ```makefile
