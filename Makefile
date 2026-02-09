@@ -31,6 +31,9 @@ RUN_PYTYPE ?= 1
 else
 RUN_PYTYPE ?= 0
 endif
+RUN_PYREFLY ?= 0
+RUN_PYRIGHT ?= 0
+RUN_MYPY ?= 0
 
 RUN_BASEDPYRIGHT ?= 0
 
@@ -106,11 +109,33 @@ security: # Check for vulnerabilities.
 
 # TODO: Phase out pytype in favor of mypy or another typechecker that supports Python 3.13+.
 # https://github.com/crickets-and-comb/shared/issues/99
-typecheck: # Check typing (runs only if pytype is installed).
+typecheck: # Check typing (runs enabled typecheckers).
 	if [ "$(RUN_PYTYPE)" = "1" ]; then \
+		echo "Running pytype..."; \
 		pytype --config="${REPO_ROOT}shared/pytype.cfg" -- ${QC_DIRS}; \
 	else \
 		echo "Skipping pytype."; \
+	fi
+	
+	if [ "$(RUN_PYREFLY)" = "1" ]; then \
+		echo "Running pyrefly..."; \
+		pyrefly check ${QC_DIRS}; \
+	else \
+		echo "Skipping pyrefly."; \
+	fi
+
+	if [ "$(RUN_PYRIGHT)" = "1" ]; then \
+		echo "Running pyright..."; \
+		pyright ${QC_DIRS}; \
+	else \
+		echo "Skipping pyright."; \
+	fi
+
+	if [ "$(RUN_MYPY)" = "1" ]; then \
+		echo "Running mypy..."; \
+		mypy ${QC_DIRS}; \
+	else \
+		echo "Skipping mypy."; \
 	fi
 
 	if [ "$(RUN_BASEDPYRIGHT)" = "1" ]; then \

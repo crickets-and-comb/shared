@@ -116,17 +116,28 @@ You can override shared make targets or add new targets that aren't in the share
 
 ### Typecheck opt-ins
 
-The shared `Makefile` includes support for multiple type checkers. By default, `pytype` is enabled for Python 3.12 (but disabled for 3.13+ due to compatibility issues), and `basedpyright` is disabled by default.
+The `typecheck` make target supports multiple typechecking tools that can be optionally enabled in consuming repos:
 
-To enable `basedpyright` in your consuming repository, set `RUN_BASEDPYRIGHT = 1` in your `Makefile` before including the shared `Makefile`:
+- **pytype**: Enabled by default for Python 3.12. Currently disabled for Python 3.13+ (see https://github.com/crickets-and-comb/shared/issues/99). You can override `RUN_PYTYPE` in your consuming repo's Makefile to explicitly enable or disable it.
+
+- **pyrefly**: Disabled by default. (Set `RUN_PYRIGHT := 1` in your Makefile to enable.)
+
+- **pyright**: Disabled by default. (Set `RUN_PYRIGHT := 1` in your Makefile to enable.)
+
+- **mypy**: Disabled by default. (Set `RUN_MYPY := 1` in your Makefile to enable.)
+
+- **basedpyright**: Disabled by default. (Set `RUN_BASEDPYRIGHT := 1` in your Makefile to enable.)
+
+Example of enabling ``pyrefly`` in consuming repo's Makefile:
 
 ```makefile
-RUN_BASEDPYRIGHT = 1
+RUN_PYREFLY := 1
+
 export
 include shared/Makefile
 ```
 
-If a type checker is enabled (`RUN_<TOOL> = 1`) but not installed, the `typecheck` target will fail when attempting to run the tool. If a type checker is disabled (`RUN_<TOOL> = 0`), it will be skipped with a message.
+Each typechecker will run if its `RUN_{TOOL}` variable is set to `1`, otherwise it will be skipped with a message.
 
 ### Workflows: usage and limitations
 
