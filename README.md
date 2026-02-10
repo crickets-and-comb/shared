@@ -114,59 +114,6 @@ Consuming Makefiles should point to the shared submodule as a subdirectory. But,
 
 You can override shared make targets or add new targets that aren't in the shared Makefile by adding them to the consuming repo's top-level Makefile.
 
-### Typecheck opt-ins
-
-The `typecheck` make target supports multiple typechecking tools that can be optionally enabled in consuming repos:
-
-- **pytype**: Enabled by default for Python 3.12. Currently disabled for Python 3.13+ (see https://github.com/crickets-and-comb/shared/issues/99). You can override `RUN_PYTYPE` in your consuming repo's Makefile to explicitly enable or disable it.
-
-- **pyright**: Disabled by default. (Set `RUN_PYRIGHT := 1` in your Makefile to enable.)
-
-- **mypy**: Disabled by default. (Set `RUN_MYPY := 1` in your Makefile to enable.)
-
-- **ty**: Disabled by default. (Set `RUN_TY := 1` in your Makefile to enable.)
-
-- **basedpyright**: Disabled by default. (Set `RUN_BASEDPYRIGHT := 1` in your Makefile to enable.)
-
-- **pyrefly**: Disabled by default. (Set `RUN_PYREFLY := 1` in your Makefile to enable.)
-
-Example of enabling ``pyrefly`` in consuming repo's Makefile:
-
-```makefile
-RUN_PYREFLY := 1
-
-export
-include shared/Makefile
-```
-
-Each typechecker will run if its `RUN_{TOOL}` variable is set to `1`, otherwise it will be skipped with a message.
-
-#### Typecheck timing
-
-The `typecheck` target automatically measures and displays the runtime of each enabled typechecker. After all typecheckers have run, a summary table will be displayed showing:
-
-- The runtime (in seconds) for each tool that ran
-- The status (PASS/FAIL) for each tool
-- The total runtime for the entire typecheck process
-
-This timing information is displayed regardless of whether any typecheckers fail, making it easy to compare performance between different typechecking tools.
-
-Example output:
-
-```
-===========================================
-  Typecheck Results
-===========================================
-
-Tool                 Time (s)     Status  
-----                 --------     ------  
-pytype               45           PASS    
-mypy                 23           PASS    
-
-Total Time:          68 s        
-===========================================
-```
-
 ### Workflows: usage and limitations
 
 The shared workflows (in `.github/workflows` or `shared/.github/workflows` from the consuming workflow) are reusable workflows, meaning they can can be called from within other workflows. See https://docs.github.com/en/actions/sharing-automations/reusing-workflows.
