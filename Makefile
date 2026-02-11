@@ -25,18 +25,6 @@ RUN_BANDIT ?= 1
 RUN_SAFETY ?= 1
 RUN_PIP_AUDIT ?= 1
 
-# Temporary workaround to skip pytype on Python 3.13+ until pytype is replaced. See https://github.com/crickets-and-comb/shared/issues/99
-ifeq ($(PYTHON_VERSION),3.12)
-RUN_PYTYPE ?= 1
-else
-RUN_PYTYPE ?= 0
-endif
-RUN_PYRIGHT ?= 0
-RUN_MYPY ?= 0
-RUN_TY ?= 0
-RUN_BASEDPYRIGHT ?= 0
-RUN_PYREFLY ?= 0
-
 EXCLUDED_TARGETS_FROM_LIST ?= # Just excludes from list-makes. Doesn't remove from available targets.
 .DEFAULT_GOAL = list-makes
 .PHONY: build-doc build-env build-package clean delete-all-branches delete-local-branch delete-remote-branch e2e format full full-qc full-test install integration lint list-makes remove-env run-act security typecheck unit update-shared
@@ -67,7 +55,7 @@ full-test: # Run all the tests.
 	$(MAKE) unit integration e2e
 
 clean: # Clear caches and coverage reports, etc.
-	cd ${REPO_ROOT} && rm -rf dist .coverage* cov_report* .mypy_cache .pytest_cache .pytype src/${PACKAGE_NAME}.egg-info *_test_report.xml
+	cd ${REPO_ROOT} && rm -rf dist .coverage* cov_report* .mypy_cache .pytest_cache src/${PACKAGE_NAME}.egg-info *_test_report.xml
 	$(shell find ${REPO_ROOT} -type f -name '*py[co]' -delete -o -type d -name __pycache__ -delete)
 
 format: # Clean up code.
@@ -107,120 +95,8 @@ security: # Check for vulnerabilities.
 		echo "Skipping pip-audit."; \
 	fi
 
-# TODO: Phase out pytype in favor of mypy or another typechecker that supports Python 3.13+.
-# https://github.com/crickets-and-comb/shared/issues/99
-typecheck: # Check typing (runs enabled typecheckers).
-	@echo ""; \
-	echo "==========================================="; \
-	echo "  Starting typecheck..."; \
-	echo "==========================================="; \
-	echo ""; \
-	total_start=$$SECONDS; \
-	timing_results=""; \
-	exit_code=0; \
-	\
-	if [ "$(RUN_PYTYPE)" = "1" ]; then \
-		echo "Running pytype..."; \
-		tool_start=$$SECONDS; \
-		if pytype --config="${REPO_ROOT}shared/pytype.cfg" -- ${QC_DIRS}; then \
-			tool_status="PASS"; \
-		else \
-			tool_status="FAIL"; \
-			exit_code=1; \
-		fi; \
-		tool_time=$$(($$SECONDS - tool_start)); \
-		timing_results="$$timing_results\npytype|$$tool_time|$$tool_status"; \
-	fi; \
-	\
-	if [ "$(RUN_PYRIGHT)" = "1" ]; then \
-		echo "Running pyright..."; \
-		tool_start=$$SECONDS; \
-		if pyright ${QC_DIRS}; then \
-			tool_status="PASS"; \
-		else \
-			tool_status="FAIL"; \
-			exit_code=1; \
-		fi; \
-		tool_time=$$(($$SECONDS - tool_start)); \
-		timing_results="$$timing_results\npyright|$$tool_time|$$tool_status"; \
-	fi; \
-	\
-	if [ "$(RUN_MYPY)" = "1" ]; then \
-		echo "Running mypy..."; \
-		tool_start=$$SECONDS; \
-		if mypy ${QC_DIRS}; then \
-			tool_status="PASS"; \
-		else \
-			tool_status="FAIL"; \
-			exit_code=1; \
-		fi; \
-		tool_time=$$(($$SECONDS - tool_start)); \
-		timing_results="$$timing_results\nmypy|$$tool_time|$$tool_status"; \
-	fi; \
-	\
-	if [ "$(RUN_TY)" = "1" ]; then \
-		echo "Running ty..."; \
-		tool_start=$$SECONDS; \
-		if ty check ${QC_DIRS}; then \
-			tool_status="PASS"; \
-		else \
-			tool_status="FAIL"; \
-			exit_code=1; \
-		fi; \
-		tool_time=$$(($$SECONDS - tool_start)); \
-		timing_results="$$timing_results\nty|$$tool_time|$$tool_status"; \
-	fi; \
-	\
-	if [ "$(RUN_BASEDPYRIGHT)" = "1" ]; then \
-		echo "Running basedpyright..."; \
-		tool_start=$$SECONDS; \
-		if basedpyright ${QC_DIRS}; then \
-			tool_status="PASS"; \
-		else \
-			tool_status="FAIL"; \
-			exit_code=1; \
-		fi; \
-		tool_time=$$(($$SECONDS - tool_start)); \
-		timing_results="$$timing_results\nbasedpyright|$$tool_time|$$tool_status"; \
-	fi; \
-	\
-	if [ "$(RUN_PYREFLY)" = "1" ]; then \
-		echo "Running pyrefly..."; \
-		tool_start=$$SECONDS; \
-		if pyrefly check ${QC_DIRS}; then \
-			tool_status="PASS"; \
-		else \
-			tool_status="FAIL"; \
-			exit_code=1; \
-		fi; \
-		tool_time=$$(($$SECONDS - tool_start)); \
-		timing_results="$$timing_results\npyrefly|$$tool_time|$$tool_status"; \
-	fi; \
-	\
-	total_time=$$(($$SECONDS - total_start)); \
-	\
-	echo ""; \
-	echo "==========================================="; \
-	echo "  Typecheck Results"; \
-	echo "==========================================="; \
-	if [ -n "$$timing_results" ]; then \
-		echo ""; \
-		printf "%-20s %-12s %-8s\n" "Tool" "Time (s)" "Status"; \
-		printf "%-20s %-12s %-8s\n" "----" "--------" "------"; \
-		echo "$$timing_results" | grep -v "^$$" | while IFS='|' read -r tool time status; do \
-			printf "%-20s %-12s %-8s\n" "$$tool" "$$time" "$$status"; \
-		done; \
-		echo ""; \
-		printf "%-20s %-12s\n" "Total Time:" "$$total_time s"; \
-	else \
-		echo ""; \
-		echo "No typecheckers were enabled."; \
-		echo ""; \
-		printf "%-20s %-12s\n" "Total Time:" "$$total_time s"; \
-	fi; \
-	echo "==========================================="; \
-	echo ""; \
-	exit $$exit_code
+typecheck: # Check typing.
+	mypy ${QC_DIRS}
 
 run-test: # Base call to pytest. (Export MARKER to specify the test type.)
 	pytest -m ${MARKER} ${REPO_ROOT} --rootdir ${REPO_ROOT} -c ${REPO_ROOT}pyproject.toml
