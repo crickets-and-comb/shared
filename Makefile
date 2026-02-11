@@ -55,7 +55,7 @@ full-test: # Run all the tests.
 	$(MAKE) unit integration e2e
 
 clean: # Clear caches and coverage reports, etc.
-	cd ${REPO_ROOT} && rm -rf dist .coverage* cov_report* .mypy_cache .pytest_cache .pytype src/${PACKAGE_NAME}.egg-info *_test_report.xml
+	cd ${REPO_ROOT} && rm -rf dist .coverage* cov_report* .mypy_cache .pytest_cache src/${PACKAGE_NAME}.egg-info *_test_report.xml
 	$(shell find ${REPO_ROOT} -type f -name '*py[co]' -delete -o -type d -name __pycache__ -delete)
 
 format: # Clean up code.
