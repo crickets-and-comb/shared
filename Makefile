@@ -87,7 +87,7 @@ security: # Check for vulnerabilities.
 # CVE-2024-9880: This can be avoided by validating user input passed to pandas.DataFrame.query.
 # CVE-2024-34997: CWE-502: Deserialization of Untrusted Data. Disputed by supplier. Not a vulnerability in Python 3.13.
 # CVE-2025-71176: CWE-379: Creation of Temporary File in Directory with Incorrect Permissions: pytest through 9.0.2 on UNIX relies on directories with the /tmp/pytest-of-{user} name pattern, which allows local users to cause a denial of service or possibly gain privileges.
-# CVE-2025-14009: Critical vulnerability in nltk<=3.9.2. Fixed in 3.9.3, but not yet released as of 2024-06-03. Until then, ignoring in pip-audit and using a git install from the develop branch which includes the fix.
+# CVE-2025-14009: Critical vulnerability in nltk<=3.9.2. Fixed in 3.9.3, but not yet released as of 2026-02-23. Until then, ignoring in pip-audit and using a git install from the develop branch which includes the fix.
 # TODO: Drop CVE-2024-34997 when dropping Python 3.12 support. https://github.com/crickets-and-comb/shared/issues/34
 # TODO: Drop CVE-2025-14009 when nltk 3.9.3 is released. https://github.com/crickets-and-comb/shared/issues/152
 	if [ "$(RUN_PIP_AUDIT)" = "1" ]; then \
