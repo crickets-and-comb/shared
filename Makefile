@@ -1,4 +1,4 @@
-PYTHON_VERSION ?= 3.12
+PYTHON_VERSION ?= 3.13
 PACKAGE_NAME ?= $(shell python -c "import configparser; cfg = configparser.ConfigParser(); cfg.read('setup.cfg'); print(cfg['metadata']['name'])")
 CONDA_ENV_NAME ?= ${PACKAGE_NAME}_py${PYTHON_VERSION}
 REPO_ROOT ?= $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
