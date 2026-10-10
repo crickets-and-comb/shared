@@ -41,7 +41,7 @@ jobs:
 
       - name: Set Default Branch
         run: |
-          git config --global init.defaultBranch debug/KalebCoberly/get-passing
+          git config --global init.defaultBranch main
 
       - name: Checkout Repository
         uses: actions/checkout@v4
