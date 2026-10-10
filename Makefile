@@ -144,6 +144,5 @@ run-act: # Run the CI-CD workflow.
 	$(MAKE) set-CI-CD-file
 
 	act ${ACT_RUN_EVENT} -W .github/workflows/CI_CD_act.yml --defaultbranch ${DEFAULT_BRANCH} ${MATRIX_OS_FLAG} ${MATRIX_PYTHON_VERSION_FLAG} \
-		--env OPENSSL_armcap=0 \ # This is needed to avoid a known issue with OpenSSL on ARM64 architecture, avoids optional accelerated crypto libraries that can cause issues with some Python packages when building on Apple Silicon (M1/M2) Macs.
 		-s CHECKOUT_SHARED=${CHECKOUT_SHARED} -s ORG_READ_TOKEN=${ORG_READ_TOKEN} -s SAFETY_API_KEY=${SAFETY_API_KEY} \
 		--input TEST_OR_PROD=${TEST_OR_PROD} --input PYTHON_BUILD_VERSION=${PYTHON_BUILD_VERSION}
