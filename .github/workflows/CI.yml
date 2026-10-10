@@ -79,6 +79,23 @@ jobs:
           echo "Safety version:"
           conda run -n ${{ env.DEV_ENV_NAME }} safety --version
 
+      - name: Debug Safety
+        env:
+          SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
+          PYTHONFAULTHANDLER: "1"
+        run: |
+          set +e
+
+          echo "Testing Safety version..."
+          conda run --no-capture-output -n "$DEV_ENV_NAME" \
+            safety --version
+          echo "Exit code: $?"
+
+          echo "Testing Safety scan..."
+          conda run --no-capture-output -n "$DEV_ENV_NAME" \
+            safety --debug --key "$SAFETY_API_KEY" scan
+          echo "Exit code: $?"
+
       - name: Run QC
         if: ${{ contains(matrix.os, 'ubuntu') }}
         run: |
