@@ -144,5 +144,6 @@ run-act: # Run the CI-CD workflow.
 	$(MAKE) set-CI-CD-file
 
 	act ${ACT_RUN_EVENT} -W .github/workflows/CI_CD_act.yml --defaultbranch ${DEFAULT_BRANCH} ${MATRIX_OS_FLAG} ${MATRIX_PYTHON_VERSION_FLAG} \
+		--env OPENSSL_armcap=0 \
 		-s CHECKOUT_SHARED=${CHECKOUT_SHARED} -s ORG_READ_TOKEN=${ORG_READ_TOKEN} -s SAFETY_API_KEY=${SAFETY_API_KEY} \
 		--input TEST_OR_PROD=${TEST_OR_PROD} --input PYTHON_BUILD_VERSION=${PYTHON_BUILD_VERSION}

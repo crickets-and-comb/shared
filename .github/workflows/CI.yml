@@ -65,8 +65,6 @@ jobs:
           conda run -n ${DEV_ENV_NAME} make install
 
       - name: Diagnose Architecture
-        env:
-          OPENSSL_armcap: "0"
         run: |
           echo "Kernel architecture:"
           uname -m
@@ -77,9 +75,6 @@ jobs:
           echo "Python architecture:"
           conda run -n ${{ env.DEV_ENV_NAME }} python -c \
             "import platform; print(platform.machine())"
-
-          echo "Safety version:"
-          conda run --no-capture-output -n "$DEV_ENV_NAME" safety --version
 
       - name: Debug Safety
         env:
