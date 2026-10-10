@@ -18,6 +18,7 @@ CI_CD_FILE_NAME ?= CI_CD.yml
 MATRIX_OS ?= ubuntu-latest
 MATRIX_PYTHON_VERSION ?=
 TEST_OR_PROD ?= dev
+DEFAULT_BRANCH ?= main
 
 
 # Security opt-ins:
@@ -142,6 +143,6 @@ run-act: # Run the CI-CD workflow.
 	cp .github/workflows/${CI_CD_FILE_NAME} .github/workflows/CI_CD_act.yml
 	$(MAKE) set-CI-CD-file
 
-	act ${ACT_RUN_EVENT} -W .github/workflows/CI_CD_act.yml --defaultbranch main ${MATRIX_OS_FLAG} ${MATRIX_PYTHON_VERSION_FLAG} \
+	act ${ACT_RUN_EVENT} -W .github/workflows/CI_CD_act.yml --defaultbranch ${DEFAULT_BRANCH} ${MATRIX_OS_FLAG} ${MATRIX_PYTHON_VERSION_FLAG} \
 		-s CHECKOUT_SHARED=${CHECKOUT_SHARED} -s ORG_READ_TOKEN=${ORG_READ_TOKEN} -s SAFETY_API_KEY=${SAFETY_API_KEY} \
 		--input TEST_OR_PROD=${TEST_OR_PROD} --input PYTHON_BUILD_VERSION=${PYTHON_BUILD_VERSION}
