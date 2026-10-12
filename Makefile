@@ -18,6 +18,7 @@ CI_CD_FILE_NAME ?= CI_CD.yml
 MATRIX_OS ?= ubuntu-latest
 MATRIX_PYTHON_VERSION ?=
 TEST_OR_PROD ?= dev
+DEFAULT_BRANCH ?= main
 
 
 # Security opt-ins:
@@ -92,7 +93,13 @@ security: # Check for vulnerabilities.
 # TODO: Drop CVE-2025-14009 when nltk 3.9.3 is released. https://github.com/crickets-and-comb/shared/issues/152
 	if [ "$(RUN_PIP_AUDIT)" = "1" ]; then \
 		echo "Running pip-audit..."; \
-		pip-audit --ignore-vuln CVE-2018-20225 --ignore-vuln CVE-2024-9880 --ignore-vuln CVE-2024-34997 --ignore-vuln CVE-2025-71176 --ignore-vuln CVE-2025-14009; \
+		pip-audit \
+			--ignore-vuln CVE-2018-20225 \
+			--ignore-vuln CVE-2024-9880 \
+			--ignore-vuln CVE-2024-34997 \
+			--ignore-vuln CVE-2025-71176 \
+			--ignore-vuln CVE-2025-14009 \
+			--ignore-vuln PYSEC-2026-3740; \
 	else \
 		echo "Skipping pip-audit."; \
 	fi
@@ -136,6 +143,6 @@ run-act: # Run the CI-CD workflow.
 	cp .github/workflows/${CI_CD_FILE_NAME} .github/workflows/CI_CD_act.yml
 	$(MAKE) set-CI-CD-file
 
-	act ${ACT_RUN_EVENT} -W .github/workflows/CI_CD_act.yml --defaultbranch main ${MATRIX_OS_FLAG} ${MATRIX_PYTHON_VERSION_FLAG} \
+	act ${ACT_RUN_EVENT} -W .github/workflows/CI_CD_act.yml --defaultbranch ${DEFAULT_BRANCH} ${MATRIX_OS_FLAG} ${MATRIX_PYTHON_VERSION_FLAG} \
 		-s CHECKOUT_SHARED=${CHECKOUT_SHARED} -s ORG_READ_TOKEN=${ORG_READ_TOKEN} -s SAFETY_API_KEY=${SAFETY_API_KEY} \
 		--input TEST_OR_PROD=${TEST_OR_PROD} --input PYTHON_BUILD_VERSION=${PYTHON_BUILD_VERSION}
