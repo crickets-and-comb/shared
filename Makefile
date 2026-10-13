@@ -96,7 +96,6 @@ security: # Check for vulnerabilities.
 		pip-audit \
 			--ignore-vuln CVE-2018-20225 \
 			--ignore-vuln CVE-2024-9880 \
-			--ignore-vuln CVE-2024-34997 \
 			--ignore-vuln CVE-2025-71176 \
 			--ignore-vuln CVE-2025-14009 \
 			--ignore-vuln PYSEC-2026-3740; \
