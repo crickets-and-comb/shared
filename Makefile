@@ -88,7 +88,7 @@ security: # Check for vulnerabilities.
 # TODO: Drop CVE-2025-14009 when nltk 3.9.3 is released. https://github.com/crickets-and-comb/shared/issues/152
 	if [ "$(RUN_PIP_AUDIT)" = "1" ]; then \
 		echo "Running pip-audit..."; \
-		pip-audit --ignore-vuln PYSEC-2026-3740;
+		pip-audit --ignore-vuln PYSEC-2026-3740; \
 	else \
 		echo "Skipping pip-audit."; \
 	fi
