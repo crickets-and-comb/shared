@@ -84,8 +84,7 @@ security: # Check for vulnerabilities.
 		echo "Skipping safety."; \
 	fi
 
-# TODO: Drop CVE-2024-34997 when dropping Python 3.12 support. https://github.com/crickets-and-comb/shared/issues/34
-# TODO: Drop CVE-2025-14009 when nltk 3.9.3 is released. https://github.com/crickets-and-comb/shared/issues/152
+	# Drop PYSEC-2026-3740 once nltk 3.10.4 released. https://github.com/crickets-and-comb/shared/issues/158
 	if [ "$(RUN_PIP_AUDIT)" = "1" ]; then \
 		echo "Running pip-audit..."; \
 		pip-audit --ignore-vuln PYSEC-2026-3740; \
