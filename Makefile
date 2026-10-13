@@ -84,7 +84,6 @@ security: # Check for vulnerabilities.
 		echo "Skipping safety."; \
 	fi
 
-# CVE-2018-20225: Ignoring as the use of --extra-index-url is secure in pip install in workflows/install_package.yaml.
 # CVE-2024-9880: This can be avoided by validating user input passed to pandas.DataFrame.query.
 # CVE-2025-71176: CWE-379: Creation of Temporary File in Directory with Incorrect Permissions: pytest through 9.0.2 on UNIX relies on directories with the /tmp/pytest-of-{user} name pattern, which allows local users to cause a denial of service or possibly gain privileges.
 # TODO: Drop CVE-2024-34997 when dropping Python 3.12 support. https://github.com/crickets-and-comb/shared/issues/34
@@ -92,7 +91,6 @@ security: # Check for vulnerabilities.
 	if [ "$(RUN_PIP_AUDIT)" = "1" ]; then \
 		echo "Running pip-audit..."; \
 		pip-audit \
-			--ignore-vuln CVE-2018-20225 \
 			--ignore-vuln CVE-2024-9880 \
 			--ignore-vuln CVE-2025-71176 \
 			--ignore-vuln PYSEC-2026-3740; \
