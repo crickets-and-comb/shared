@@ -23,6 +23,7 @@ DEFAULT_BRANCH ?= main
 
 # Security opt-ins:
 RUN_BANDIT ?= 1
+# Stop skipping once `safety` compatible with `filelock>=4.2.1`. https://github.com/crickets-and-comb/shared/issues/161
 RUN_SAFETY ?= 0
 RUN_PIP_AUDIT ?= 1
 
