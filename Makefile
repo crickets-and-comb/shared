@@ -85,10 +85,9 @@ security: # Check for vulnerabilities.
 		echo "Skipping safety."; \
 	fi
 
-	# Drop PYSEC-2026-3740 once nltk 3.10.4 released. https://github.com/crickets-and-comb/shared/issues/158
 	if [ "$(RUN_PIP_AUDIT)" = "1" ]; then \
 		echo "Running pip-audit..."; \
-		pip-audit --ignore-vuln PYSEC-2026-3740; \
+		pip-audit; \
 	else \
 		echo "Skipping pip-audit."; \
 	fi
