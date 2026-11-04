@@ -20,6 +20,7 @@ MATRIX_PYTHON_VERSION ?=
 TEST_OR_PROD ?= dev
 DEFAULT_BRANCH ?= main
 
+.SILENT: security
 
 # Security opt-ins:
 RUN_BANDIT ?= 1
