@@ -116,6 +116,8 @@ jobs:
           if [[ -z "$RELEASE_VERSION" ]]; then
             echo "RELEASE_VERSION is not set, using version from setup.cfg."
             RELEASE_VERSION=$(python -c "import configparser; cfg = configparser.ConfigParser(); cfg.read('setup.cfg'); print(cfg['metadata']['version'])")
+            # Python on Windows can emit CRLF, and command substitution only drops the LF.
+            RELEASE_VERSION="${RELEASE_VERSION//$'\r'/}"
           fi
 
           PEP440_REGEX='^([0-9]+!)?[0-9]+(\.[0-9]+)*((a|b|rc)[0-9]+)?(\.post[0-9]+)?(\.dev[0-9]+)?$'
