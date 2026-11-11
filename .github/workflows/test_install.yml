@@ -135,6 +135,7 @@ jobs:
           TEST_OR_PROD: ${{ needs.sanitize-inputs.outputs.TEST_OR_PROD }}
         run: |
           PACKAGE_NAME=$(python -c "import configparser; cfg = configparser.ConfigParser(); cfg.read('setup.cfg'); print(cfg['metadata']['name'])")
+          PACKAGE_NAME="${PACKAGE_NAME//$'\r'/}"
           echo "PACKAGE_NAME=${PACKAGE_NAME}" >> $GITHUB_ENV
           PACKAGE_NAME_HYPHEN=$(echo ${PACKAGE_NAME} | tr '_' '-')
 
@@ -144,12 +145,16 @@ jobs:
             TEST_PYPI_FLAG="-i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/"
           fi
 
-          conda run -n ${{ env.ENV_NAME }} pip install ${TEST_PYPI_FLAG} "${PACKAGE_NAME_HYPHEN}==${RELEASE_VERSION}"
+          conda run -n "$ENV_NAME" pip install ${TEST_PYPI_FLAG} "${PACKAGE_NAME_HYPHEN}==${RELEASE_VERSION}"
 
       - name: Run Tests
         run: |
-          conda activate ${{ env.ENV_NAME }}
-          python -c "import ${{ env.PACKAGE_NAME }}"
+          if [[ ! "$PACKAGE_NAME" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+            echo "Invalid PACKAGE_NAME in setup.cfg: must be a Python identifier."
+            exit 1
+          fi
+          conda activate "$ENV_NAME"
+          python -c "import $PACKAGE_NAME"
           pip install pytest
           if [[ "${{ matrix.os }}" == *"windows"* ]]; then
             pytest tests\\
