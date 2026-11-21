@@ -56,6 +56,22 @@ The `security` make target uses `pip-audit` (from PyPA) to check for vulnerabili
 
 If you need to ignore specific vulnerabilities, they are configured directly in the Makefile's `security` target using `--ignore-vuln` flags.
 
+#### pydoclint
+
+The `lint` make target runs `flake8` with `shared/.flake8`, which selects the `DOC` codes from [pydoclint](https://jsh9.github.io/pydoclint/). The Google convention in `flake8-docstrings` checks that an `Args:` section is well formed but doesn't require one, so a function with arguments and a one-line docstring passes. pydoclint requires `Args:`, `Returns:`, `Yields:` and `Raises:` sections that match the function signature and body. Short (one-line) docstrings are checked too. Docstrings shouldn't repeat type hints, since the annotations carry the types.
+
+Add `pydoclint[flake8]` to your consuming repo's QC dependencies (e.g., in `setup.cfg` under `[options.extras_require]`):
+
+```diff
+  qc =
+      ...
+      flake8-docstrings
++     pydoclint[flake8]
+      ...
+```
+
+If the plugin isn't installed, `flake8` silently skips the `DOC` checks, so `make lint` still passes but nothing is enforced.
+
 ### Docs deployment
 
 We use `peaceiris/actions-gh-pages` to deploy docs to GitHub Pages (e.g., https://crickets-and-comb.github.io/reference_package/). You'll need to keep a branch on the remote called `gh-pages`.
