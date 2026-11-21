@@ -4,9 +4,10 @@
 # B,B9  : flake8-bugbear
 # C     : McCabe code complexity
 # D     : flake8-docstrings
+# DOC   : pydoclint (flake8 plugin, install with `pydoclint[flake8]`)
 # F     : pyflakes
 # W,E   : pycodestyle (pep8) warnings and errors
-select = ANN,B,B9,C,D,E,F,W
+select = ANN,B,B9,C,D,DOC,E,F,W
 
 exclude =
 
@@ -31,3 +32,11 @@ max-line-length = 94
 black-config = ./shared/pyproject.toml
 
 docstring-convention = google
+
+# pydoclint: Require Args/Returns/Yields/Raises sections that match the signature.
+# Type annotations carry the types, so docstrings shouldn't repeat them.
+style = google
+arg-type-hints-in-docstring = False
+check-return-types = False
+check-yield-types = False
+skip-checking-short-docstrings = False
