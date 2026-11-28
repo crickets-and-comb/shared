@@ -42,6 +42,14 @@ jobs:
             echo "DIST_DIR is required."
             exit 1
           fi
+          # Relative path inside the workspace: no leading slash, no `.`/`..` segments
+          # (the Makefile runs `rm -rf` on it),
+          # and only characters that are safe unquoted in shell and globs.
+          if [[ ! "$DIST_DIR" =~ ^[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*/?$ ]] \
+            || [[ "$DIST_DIR" =~ (^|/)\.+(/|$) ]]; then
+            echo "Invalid DIST_DIR: must be a relative path within the repo (e.g. dist/)."
+            exit 1
+          fi
 
           echo "Using DIST_DIR: $DIST_DIR"
           echo "DIST_DIR=$DIST_DIR" >> $GITHUB_OUTPUT
@@ -55,6 +63,10 @@ jobs:
             echo "PYTHON_BUILD_VERSION is required."
             exit 1
           fi
+          if [[ ! "$PYTHON_BUILD_VERSION" =~ ^[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid PYTHON_BUILD_VERSION: $PYTHON_BUILD_VERSION"
+            exit 1
+          fi
 
           echo "Using PYTHON_BUILD_VERSION: $PYTHON_BUILD_VERSION"
           echo "PYTHON_BUILD_VERSION=$PYTHON_BUILD_VERSION" >> $GITHUB_OUTPUT
@@ -66,6 +78,10 @@ jobs:
         run: |
           if [[ -z "$PYTHON_PACKAGE_DIST_NAME" ]]; then
             echo "PYTHON_PACKAGE_DIST_NAME is required."
+            exit 1
+          fi
+          if [[ ! "$PYTHON_PACKAGE_DIST_NAME" =~ ^[A-Za-z0-9._-]+$ ]]; then
+            echo "Invalid PYTHON_PACKAGE_DIST_NAME: use only letters, digits, '.', '_' and '-'."
             exit 1
           fi
 
@@ -107,18 +123,29 @@ jobs:
 
       - name: Get Version from Dist
         id: extract_version
+        env:
+          DIST_DIR: ${{ needs.validate-inputs.outputs.DIST_DIR }}
         run: |
           pip install pkginfo
-          
-          tarball=$(ls ${{ needs.validate-inputs.outputs.DIST_DIR }}/*.tar.gz | head -n 1)
-          wheel=$(ls ${{ needs.validate-inputs.outputs.DIST_DIR }}/*.whl | head -n 1)
 
+          tarball=$(ls "$DIST_DIR"/*.tar.gz | head -n 1)
+          wheel=$(ls "$DIST_DIR"/*.whl | head -n 1)
+
+          # Pass the path as an argument rather than splicing it into Python source.
+          GET_VERSION='import sys, pkginfo; print(pkginfo.get_metadata(sys.argv[1]).version)'
           if [ -f "$tarball" ]; then
-            version=$(python -c "import pkginfo; info = pkginfo.get_metadata('$tarball'); print(info.version)")
+            version=$(python -c "$GET_VERSION" "$tarball")
           elif [ -f "$wheel" ]; then
-            version=$(python -c "import pkginfo; info = pkginfo.get_metadata('$wheel'); print(info.version)")
+            version=$(python -c "$GET_VERSION" "$wheel")
           else
             echo "No distribution files found."
+            exit 1
+          fi
+
+          # The version becomes a git tag and is written to GITHUB_ENV, so require PEP 440.
+          PEP440_REGEX='^([0-9]+!)?[0-9]+(\.[0-9]+)*((a|b|rc)[0-9]+)?(\.post[0-9]+)?(\.dev[0-9]+)?$'
+          if [[ ! "$version" =~ $PEP440_REGEX ]]; then
+            echo "Invalid version in dist metadata. Must be a PEP 440 public version."
             exit 1
           fi
 
@@ -127,16 +154,19 @@ jobs:
       - name: Create GitHub Release
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
         run: >-
           gh release create
-          '${{ env.VERSION_TAG }}'
-          --repo '${{ github.repository }}'
+          "$VERSION_TAG"
+          --repo "$REPOSITORY"
           --notes ""
 
       - name: Upload Artifact Signatures to GitHub Release
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          DIST_DIR: ${{ needs.validate-inputs.outputs.DIST_DIR }}
         run: >-
           gh release upload
-          '${{ env.VERSION_TAG }}' ${{ needs.validate-inputs.outputs.DIST_DIR }}/**
-          --repo '${{ github.repository }}'
+          "$VERSION_TAG" "$DIST_DIR"/**
+          --repo "$REPOSITORY"
