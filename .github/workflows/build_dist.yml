@@ -49,6 +49,14 @@ jobs:
             echo "DIST_DIR is required."
             exit 1
           fi
+          # Relative path inside the workspace: no leading slash, no `.`/`..` segments
+          # (the Makefile runs `rm -rf` on it),
+          # and only characters that are safe unquoted in shell and globs.
+          if [[ ! "$DIST_DIR" =~ ^[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*/?$ ]] \
+            || [[ "$DIST_DIR" =~ (^|/)\.+(/|$) ]]; then
+            echo "Invalid DIST_DIR: must be a relative path within the repo (e.g. dist/)."
+            exit 1
+          fi
 
           echo "Using DIST_DIR: $DIST_DIR"
           echo "DIST_DIR=$DIST_DIR" >> $GITHUB_OUTPUT
@@ -78,6 +86,10 @@ jobs:
             echo "PYTHON_PACKAGE_DIST_NAME is required."
             exit 1
           fi
+          if [[ ! "$PYTHON_PACKAGE_DIST_NAME" =~ ^[A-Za-z0-9._-]+$ ]]; then
+            echo "Invalid PYTHON_PACKAGE_DIST_NAME: use only letters, digits, '.', '_' and '-'."
+            exit 1
+          fi
           echo "Using PYTHON_PACKAGE_DIST_NAME: $PYTHON_PACKAGE_DIST_NAME"
           echo "PYTHON_PACKAGE_DIST_NAME=$PYTHON_PACKAGE_DIST_NAME" >> $GITHUB_OUTPUT
 
@@ -93,13 +105,22 @@ jobs:
       
       - name: Set ref
         id: set-ref
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GITHUB_REF_VALUE: ${{ github.ref || '' }}
         run: |
-          if [[ "${{ github.event_name }}" == "pull_request_target" ]]; then
+          if [[ "$EVENT_NAME" == "pull_request_target" ]]; then
+            if [[ ! "$PR_NUMBER" =~ ^[0-9]+$ ]]; then
+              echo "Invalid pull request number."
+              exit 1
+            fi
             echo "Using PR merge ref to avoid running workflows on forked repo."
-            echo "ref=refs/pull/${{ github.event.pull_request.number }}/merge" >> $GITHUB_OUTPUT
-          elif [[ -n "${{ github.ref || '' }}" ]]; then
+            echo "ref=refs/pull/${PR_NUMBER}/merge" >> $GITHUB_OUTPUT
+          elif [[ -n "$GITHUB_REF_VALUE" ]]; then
+            # Branch names may contain shell metacharacters, but never newlines.
             echo "Using github.ref"
-            echo "ref=${{ github.ref }}" >> $GITHUB_OUTPUT
+            echo "ref=${GITHUB_REF_VALUE}" >> $GITHUB_OUTPUT
           else
             echo "Using fallback default ref"
             echo "ref=refs/heads/main" >> $GITHUB_OUTPUT
@@ -120,16 +141,20 @@ jobs:
           python-version: ${{ needs.validate-inputs.outputs.PYTHON_BUILD_VERSION }}
 
       - name: Build Environment.
+        env:
+          PYTHON_BUILD_VERSION: ${{ needs.validate-inputs.outputs.PYTHON_BUILD_VERSION }}
         run: |
-          CONDA_ENV_NAME=build_dist_py${{ needs.validate-inputs.outputs.PYTHON_BUILD_VERSION }}
+          CONDA_ENV_NAME="build_dist_py${PYTHON_BUILD_VERSION}"
           echo "CONDA_ENV_NAME=${CONDA_ENV_NAME}" >> $GITHUB_ENV
 
-          make build-env CONDA_ENV_NAME=${CONDA_ENV_NAME} PYTHON_VERSION=${{ needs.validate-inputs.outputs.PYTHON_BUILD_VERSION }}
-          conda run -n ${CONDA_ENV_NAME} make install INSTALL_EXTRAS=[build]
+          make build-env CONDA_ENV_NAME="${CONDA_ENV_NAME}" PYTHON_VERSION="${PYTHON_BUILD_VERSION}"
+          conda run -n "${CONDA_ENV_NAME}" make install INSTALL_EXTRAS=[build]
 
       - name: Build Package
+        env:
+          DIST_DIR: ${{ needs.validate-inputs.outputs.DIST_DIR }}
         run: |
-          conda run -n ${{ env.CONDA_ENV_NAME }} make build-package DIST_DIR=${{ needs.validate-inputs.outputs.DIST_DIR }}
+          conda run -n "${CONDA_ENV_NAME}" make build-package DIST_DIR="${DIST_DIR}"
 
       - name: Upload Package
         if: ${{ inputs.UPLOAD_DIST }}
